@@ -44,7 +44,9 @@ fn main() {
                 engine.prompt.clone(),
                 input_buf.clone(),
             ));
-            if !input_buf.is_empty() {
+            if input_buf.is_empty() {
+                tx.send(UiMsg::SetSuggestions(None));
+            } else {
                 tx.send(UiMsg::ExpectSuggsFor(search_term.clone()));
                 let url = engine.suggestion_url.replace("%s", &search_term);
                 let tx2 = tx.clone();
@@ -255,8 +257,6 @@ fn ui_loop(rx: Receiver<UiMsg>, terminal: Terminal, mut cursor: TerminalCursor) 
     let (t_w, t_h) = terminal.terminal_size();
     let mut selected_n: usize = 0;
     loop {
-        // draw ui line
-        let mut lines_printed = 0;
         cursor.move_left(t_w);
         terminal.clear(ClearType::CurrentLine);
         match &prompt {
@@ -279,23 +279,29 @@ fn ui_loop(rx: Receiver<UiMsg>, terminal: Terminal, mut cursor: TerminalCursor) 
             None => {}
         };
         println!(" {}_", input_line);
-        lines_printed += 1;
-        let suggest_lines = 10; /*if let Some(ref suggs) = suggs {
+        let suggest_lines = 15; /*if let Some(ref suggs) = suggs {
             suggs.sugg_terms.len()
         } else {
             0
         }; */
-        if let Some(ref suggs) = suggs {
-            for (n, line) in suggs.sugg_terms.iter().enumerate() {
-                terminal.clear(ClearType::CurrentLine);
-                cursor.move_left(t_w);
-                if selected_n == n {
-                    println!("{}", line);
-                } else {
-                    println!("{}", line);
+        for n in 0..suggest_lines {
+
+            terminal.clear(ClearType::CurrentLine);
+            cursor.move_left(t_w);
+
+            if let Some(ref suggs) = suggs {
+                match suggs.sugg_terms.get(n) {
+                    Some(line) => {
+                        if selected_n == n {
+                            //print!("-");
+                        }
+                        print!("{}", line);
+                    },
+                    None => {}
                 }
-                lines_printed += 1;
             }
+
+            println!();
         }
         let msg = rx.recv().unwrap();
         match msg {
@@ -321,35 +327,16 @@ fn ui_loop(rx: Receiver<UiMsg>, terminal: Terminal, mut cursor: TerminalCursor) 
                 input_line = s;
                 prompt = Some(new_prompt);
             }
-            UiMsg::SetSuggestions(new_sugg) => {
-                match new_sugg {
-                    Some(ref new_sugg) => match waiting_for_term {
-                        Some(ref expected_term) if expected_term == &new_sugg.term => {
-                            if let Some(ref old_suggs) = suggs {
-                                let n_delta = old_suggs.sugg_terms.len() as i32
-                                    - new_sugg.sugg_terms.len() as i32;
-                                if n_delta > 0 {
-                                    for _ in 0..n_delta as usize {
-                                        cursor.move_up(1);
-                                        terminal.clear(ClearType::CurrentLine);
-                                        lines_printed -= 1;
-                                    }
-                                }
-                            }
-                        }
-                        _ => {}
-                    },
-                    None => {
-                        if let Some(ref suggs) = suggs {
-                            for _ in 0..suggs.sugg_terms.len() as usize {
-                                cursor.move_up(1);
-                                terminal.clear(ClearType::CurrentLine);
-                                lines_printed -= 1;
-                            }
+            UiMsg::SetSuggestions(suggestion_update) => {
+                if let Some(ref new_sugg) = suggestion_update {
+                    if let Some(ref expected_term) = waiting_for_term {
+                        if &new_sugg.term == expected_term {
+                            suggs = suggestion_update;
                         }
                     }
+                } else {
+                    suggs = None;
                 }
-                suggs = new_sugg
             }
             UiMsg::Nop => {}
             UiMsg::SelNext => {
@@ -368,7 +355,7 @@ fn ui_loop(rx: Receiver<UiMsg>, terminal: Terminal, mut cursor: TerminalCursor) 
             }
         };
         counter += 1;
-        cursor.move_up(lines_printed);
+        cursor.move_up(suggest_lines as u16 + 1);
     }
     cursor.show();
     cursor.move_left(t_w);
