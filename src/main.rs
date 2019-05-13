@@ -50,7 +50,7 @@ fn main() {
                 tx.send(UiMsg::SetSuggestions(None));
             } else {
                 tx.send(UiMsg::ExpectSuggsFor(search_term.clone()));
-                let url = engine.suggestion_url.replace("%s", &search_term);
+                let url = engine.format_suggestion_url(&search_term);
                 let tx2 = tx.clone();
                 let sugg_thread = thread::spawn(move || {
                     tx2.send(UiMsg::SetSuggestions(fetch_suggs(url).ok()));
@@ -61,7 +61,7 @@ fn main() {
                     InputEvent::Keyboard(k) => match k {
                         KeyEvent::Char('\n') => {
                             input_buf.clear();
-                            let url = engine.search_url.replace("%s", &search_term);
+                            let url = engine.format_search_url(&search_term);
                             tx.send(UiMsg::Finish(format!(
                                 "=> {}", url
                             )));
@@ -128,6 +128,15 @@ struct Engine {
     search_url: String,
 }
 
+impl Engine {
+    pub fn format_suggestion_url(&self, search_term: &str) -> String {
+        self.suggestion_url.replace("%s", &search_term.replace(" ", "+"))
+    }
+    pub fn format_search_url(&self, search_term: &str) -> String {
+        self.search_url.replace("%s", &search_term.replace(" ", "+"))
+    }
+}
+
 fn match_engine<'a, 'b>(
     input_line: &'b str,
     engines: &'a HashMap<String, Engine>,
@@ -162,6 +171,22 @@ fn define_engines() -> HashMap<String, Engine> {
                 text_fg: Color::Black,
                 text_bg: Color::White,
                 text: String::from(" Google "),
+            },
+        },
+    );
+    engs.insert(
+        "red".to_string(),
+        Engine {
+            name: "Reddit".to_string(),
+            suggestion_url: "https://www.google.com/complete/search?client=chrome&q=%s".to_string(),
+            search_url: "https://www.google.com/search?q=site:reddit.com+%s".to_string(),
+            prompt: Prompt {
+                icon_fg: Color::White,
+                icon_bg: Color::Red,
+                icon: String::from(" ⬬ "),
+                text_fg: Color::Black,
+                text_bg: Color::White,
+                text: String::from(" Reddit "),
             },
         },
     );
