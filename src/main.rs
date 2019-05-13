@@ -142,10 +142,19 @@ fn match_engine<'a, 'b>(
     engines: &'a HashMap<String, Engine>,
 ) -> (&'a Engine, String) {
     let default_engine = engines.get("").unwrap();
+
+    // escape search engine keyword with question mark like Chrome
+    if input_line.starts_with("?") {
+        return (default_engine, input_line[1..].to_string());
+    }
+
     let words: Vec<&str> = input_line.split_whitespace().collect();
+
+    // in the empty case, or if a keyword is typed but there's no space after it, skip matching.
     if words.len() < 1 || (words.len() == 1 && !input_line.ends_with(" ")) {
         return (default_engine, input_line.trim().to_string());
     }
+
     let potential_prefix = words.first().unwrap();
     match engines.get(&potential_prefix.to_string()) {
         Some(engine) => {
