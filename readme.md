@@ -7,4 +7,4 @@
 - [x] Definable engines with prefixes, prompts, and endpoints
 - [x] Browser launching
 - [ ] File based config
-- [ ] Selection of suggestions
+- [x] Selection of suggestions
