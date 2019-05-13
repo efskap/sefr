@@ -1,35 +1,25 @@
 extern crate crossterm;
 extern crate reqwest;
-//extern crate serde_json;
-//extern crate serde;
 extern crate json;
 extern crate webbrowser;
 
 use crossterm::{
-    cursor, input, terminal, AlternateScreen, Attribute, ClearType, Color, Colored, Crossterm,
+    input, Attribute, ClearType, Color, Colored, Crossterm,
     InputEvent, KeyEvent, RawScreen, Terminal, TerminalCursor,
 };
 
-use serde::{Deserialize, Serialize};
 use std::cmp::max;
 use std::collections::HashMap;
-use std::error::Error;
-use std::io;
-use std::io::prelude::*;
 use std::result::Result;
 use std::sync::mpsc;
-use std::sync::mpsc::{Receiver, Sender};
-use std::sync::{Arc, Mutex};
-use std::{process, thread, time};
-use std::env;
-use std::process::Command;
-//const SUGGEST_LINES: u16 = 10;
+use std::sync::mpsc::Receiver;
+use std::thread;
 
 #[allow(unused_must_use)]
 fn main() {
     let (tx, rx) = mpsc::channel();
 
-    let screen = RawScreen::into_raw_mode();
+    let _screen = RawScreen::into_raw_mode();
     let crossterm = Crossterm::new();
     let cursor = crossterm.cursor();
     let terminal = crossterm.terminal();
@@ -52,7 +42,7 @@ fn main() {
                 tx.send(UiMsg::ExpectSuggsFor(search_term.clone()));
                 let url = engine.format_suggestion_url(&search_term);
                 let tx2 = tx.clone();
-                let sugg_thread = thread::spawn(move || {
+                thread::spawn(move || {
                     tx2.send(UiMsg::SetSuggestions(fetch_suggs(url).ok()));
                 });
             }
@@ -121,6 +111,8 @@ fn fetch_suggs(url: String) -> Result<Suggestions, Box<std::error::Error>> {
     let sugg_terms: Vec<String> = data[1].members().map(|opt|opt.as_str().expect("one of the values in the second value (which should be an array) is not a string").to_string()).collect(); // todo: error handling
     Ok(Suggestions { term, sugg_terms })
 }
+
+#[allow(dead_code)] // maybe I'll use name later ok
 struct Engine {
     prompt: Prompt,
     name: String,
@@ -280,7 +272,6 @@ enum UiMsg {
     ExpectSuggsFor(String),
     SelNext,
     SelPrev,
-    Nop,
 }
 
 #[allow(unused_must_use)]
@@ -290,8 +281,7 @@ fn ui_loop(rx: Receiver<UiMsg>, terminal: Terminal, mut cursor: TerminalCursor) 
     let mut suggs: Option<Suggestions> = None;
     let mut prompt: Option<Prompt> = None;
     let mut waiting_for_term: Option<String> = None; //
-    let mut counter = 0;
-    let (t_w, t_h) = terminal.terminal_size();
+    let (t_w, _t_h) = terminal.terminal_size();
     let mut selected_n: usize = 0;
     loop {
         cursor.move_left(t_w);
@@ -375,7 +365,6 @@ fn ui_loop(rx: Receiver<UiMsg>, terminal: Terminal, mut cursor: TerminalCursor) 
                     suggs = None;
                 }
             }
-            UiMsg::Nop => {}
             UiMsg::SelNext => {
                 selected_n += 1;
                 if selected_n >= suggest_lines {
@@ -391,7 +380,6 @@ fn ui_loop(rx: Receiver<UiMsg>, terminal: Terminal, mut cursor: TerminalCursor) 
                 waiting_for_term = Some(term);
             }
         };
-        counter += 1;
         cursor.move_up(suggest_lines as u16 + 1);
     }
     cursor.show();
