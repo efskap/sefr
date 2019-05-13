@@ -3,6 +3,7 @@ extern crate reqwest;
 //extern crate serde_json;
 //extern crate serde;
 extern crate json;
+extern crate webbrowser;
 
 use crossterm::{
     cursor, input, terminal, AlternateScreen, Attribute, ClearType, Color, Colored, Crossterm,
@@ -20,7 +21,8 @@ use std::sync::mpsc;
 use std::sync::mpsc::{Receiver, Sender};
 use std::sync::{Arc, Mutex};
 use std::{process, thread, time};
-
+use std::env;
+use std::process::Command;
 //const SUGGEST_LINES: u16 = 10;
 
 #[allow(unused_must_use)]
@@ -59,10 +61,11 @@ fn main() {
                     InputEvent::Keyboard(k) => match k {
                         KeyEvent::Char('\n') => {
                             input_buf.clear();
+                            let url = engine.search_url.replace("%s", &search_term);
                             tx.send(UiMsg::Finish(format!(
-                                "Searching for {} on {}!",
-                                search_term, engine.name
+                                "=> {}", url
                             )));
+                            webbrowser::open(&url).expect("Couldn't open browser.");
                             break;
                         }
                         KeyEvent::Char('\t') | KeyEvent::Ctrl('n') | KeyEvent::Down => {
@@ -151,7 +154,7 @@ fn define_engines() -> HashMap<String, Engine> {
         Engine {
             name: "Google".to_string(),
             suggestion_url: "https://www.google.com/complete/search?client=chrome&q=%s".to_string(),
-            search_url: "null".to_string(),
+            search_url: "https://www.google.com/search?q=%s".to_string(),
             prompt: Prompt {
                 icon_fg: Color::White,
                 icon_bg: Color::Blue,
@@ -167,7 +170,7 @@ fn define_engines() -> HashMap<String, Engine> {
         Engine {
             name: "Wiktionary".to_string(),
             suggestion_url: "https://en.wiktionary.org/w/api.php?action=opensearch&search=%s&limit=10&namespace=0&format=json".to_string(),
-            search_url: "null".to_string(),
+            search_url: "https://en.wiktionary.org/wiki/%s".to_string(),
             prompt: Prompt {
                 icon_fg: Color::Black,
                 icon_bg: Color::White,
@@ -185,7 +188,7 @@ fn define_engines() -> HashMap<String, Engine> {
             suggestion_url:
                 "http://suggestqueries.google.com/complete/search?client=firefox&ds=yt&q=%s"
                     .to_string(),
-            search_url: "null".to_string(),
+            search_url: "https://www.youtube.com/results?q=%s".to_string(),
             prompt: Prompt {
                 icon_fg: Color::White,
                 icon_bg: Color::Red,
@@ -203,7 +206,7 @@ fn define_engines() -> HashMap<String, Engine> {
             suggestion_url:
                 "https://us-central1-subreddit-suggestions.cloudfunctions.net/suggest?query=%s"
                     .to_string(),
-            search_url: "null".to_string(),
+            search_url: "https://www.reddit.com/r/%s".to_string(),
             prompt: Prompt {
                 icon_fg: Color::White,
                 icon_bg: Color::Red,
