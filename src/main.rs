@@ -179,7 +179,11 @@ fn main() {
                                         let (_, interfering_prefix, _) =
                                             match_engine(&selected, &engines);
                                         if !interfering_prefix.is_empty() {
-                                            input_line = format!("?{}", selected.to_string());
+                                            if interfering_prefix == prefix {
+                                                input_line = format!("{} {}", prefix, selected.to_string());
+                                            } else {
+                                                input_line = format!("?{}", selected.to_string());
+                                            }
                                         } else if !prefix.is_empty() {
                                             input_line =
                                                 format!("{} {}", prefix, selected.to_string());
@@ -202,7 +206,11 @@ fn main() {
                                         let (_, interfering_prefix, _) =
                                             match_engine(&selected, &engines);
                                         if !interfering_prefix.is_empty() {
-                                            input_line = format!("?{}", selected.to_string());
+                                            if interfering_prefix == prefix {
+                                                input_line = format!("{} {}", prefix, selected.to_string());
+                                            } else {
+                                                input_line = format!("?{}", selected.to_string());
+                                            }
                                         } else if !prefix.is_empty() {
                                             input_line =
                                                 format!("{} {}", prefix, selected.to_string());
