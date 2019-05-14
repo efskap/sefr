@@ -12,6 +12,8 @@ use std::collections::HashMap;
 use std::result::Result;
 use std::sync::mpsc;
 use std::thread;
+mod engine;
+use engine::*;
 
 #[allow(unused_must_use)]
 fn main() {
@@ -32,23 +34,19 @@ fn main() {
         let mut should_quit = false;
         loop {
             let key = stdin.next();
-            match &key {
-                Some(ie) => match ie {
+            if let Some(ie) = &key {
+                match ie {
                     InputEvent::Keyboard(k) => match k {
                         KeyEvent::Char('\n') => {
                             should_quit = true;
                         }
-                        KeyEvent::Ctrl(c) => match c {
-                            'c' => {
-                                should_quit = true;
-                            }
-                            _ => {}
-                        },
+                        KeyEvent::Ctrl('c') => {
+                            should_quit = true;
+                        }
                         _ => {}
                     },
                     _ => {}
-                },
-                _ => {}
+                }
             };
             input_tx.send(UiMsg::OnInput(key));
             if should_quit {
@@ -70,10 +68,10 @@ fn main() {
     loop {
         let (engine, prefix, search_term) = match_engine(&input_line, &engines);
         if let Some(ref prev_engine) = prev_engine {
-        if prev_engine.suggestion_url != engine.suggestion_url {
-            suggs = None;
-            refresh_completions = true;
-        }
+            if prev_engine.suggestion_url != engine.suggestion_url {
+                suggs = None;
+                refresh_completions = true;
+            }
         }
         prev_engine = Some(&engine);
         if refresh_completions {
@@ -115,7 +113,11 @@ fn main() {
                                 } else {
                                     0
                                 }; */
-        let selectable_lines = if let Some(ref suggs) = suggs { min(suggest_lines, suggs.sugg_terms.len())} else {0};
+        let selectable_lines = if let Some(ref suggs) = suggs {
+            min(suggest_lines, suggs.sugg_terms.len())
+        } else {
+            0
+        };
         for n in 0..suggest_lines {
             terminal.clear(ClearType::CurrentLine);
             cursor.move_left(t_w);
@@ -177,9 +179,7 @@ fn main() {
                                     } else {
                                         0
                                     });
-                                    if selected_n.unwrap()
-                                        >= selectable_lines
-                                    {
+                                    if selected_n.unwrap() >= selectable_lines {
                                         selected_n = Some(0);
                                     }
                                     if let Some(selected) =
@@ -189,7 +189,8 @@ fn main() {
                                             match_engine(&selected, &engines);
                                         if !interfering_prefix.is_empty() {
                                             if interfering_prefix == prefix {
-                                                input_line = format!("{} {}", prefix, selected.to_string());
+                                                input_line =
+                                                    format!("{} {}", prefix, selected.to_string());
                                             } else {
                                                 input_line = format!("?{}", selected.to_string());
                                             }
@@ -207,7 +208,7 @@ fn main() {
                                 if let Some(ref suggs) = suggs {
                                     selected_n =
                                         Some(selected_n.unwrap_or(0).checked_sub(1).unwrap_or(
-                                           selectable_lines.checked_sub(1).unwrap_or(0),
+                                            selectable_lines.checked_sub(1).unwrap_or(0),
                                         ));
                                     if let Some(selected) =
                                         suggs.sugg_terms.get(selected_n.unwrap())
@@ -216,7 +217,8 @@ fn main() {
                                             match_engine(&selected, &engines);
                                         if !interfering_prefix.is_empty() {
                                             if interfering_prefix == prefix {
-                                                input_line = format!("{} {}", prefix, selected.to_string());
+                                                input_line =
+                                                    format!("{} {}", prefix, selected.to_string());
                                             } else {
                                                 input_line = format!("?{}", selected.to_string());
                                             }
@@ -285,142 +287,7 @@ fn fetch_suggs(url: String) -> Result<Suggestions, Box<std::error::Error>> {
     Ok(Suggestions { term, sugg_terms })
 }
 
-#[allow(dead_code)] // maybe I'll use name later ok
-struct Engine {
-    prompt: Prompt,
-    name: String,
-    suggestion_url: String,
-    search_url: String,
-}
 
-impl Engine {
-    pub fn format_suggestion_url(&self, search_term: &str) -> String {
-        self.suggestion_url
-            .replace("%s", &search_term.replace(" ", "+"))
-    }
-    pub fn format_search_url(&self, search_term: &str) -> String {
-        self.search_url
-            .replace("%s", &search_term.replace(" ", "+"))
-    }
-}
-
-// TODO: this should prolly return slices, not Strings
-fn match_engine<'a, 'b>(
-    input_line: &'b str,
-    engines: &'a HashMap<String, Engine>,
-) -> (&'a Engine, String, String) {
-    let default_engine = engines.get("").unwrap();
-
-    // escape search engine keyword with question mark like Chrome
-    if input_line.starts_with("?") {
-        return (default_engine, String::new(), input_line[1..].to_string());
-    }
-
-    let words: Vec<&str> = input_line.split_whitespace().collect();
-
-    // in the empty case, or if a keyword is typed but there's no space after it, skip matching.
-    if words.len() < 1 || (words.len() == 1 && !input_line.ends_with(" ")) {
-        return (default_engine, String::new(), input_line.trim().to_string());
-    }
-
-    let potential_prefix = words.first().unwrap();
-    match engines.get(&potential_prefix.to_string()) {
-        Some(engine) => {
-            let search_term = input_line[potential_prefix.len()..].trim().to_string();
-            (engine, potential_prefix.to_string(), search_term)
-        }
-        None => (default_engine, String::new(), input_line.trim().to_string()),
-    }
-}
-
-fn define_engines() -> HashMap<String, Engine> {
-    let mut engs = HashMap::new();
-    engs.insert(
-        "".to_string(),
-        Engine {
-            name: "Google".to_string(),
-            suggestion_url: "https://www.google.com/complete/search?client=chrome&q=%s".to_string(),
-            search_url: "https://www.google.com/search?q=%s".to_string(),
-            prompt: Prompt {
-                icon_fg: Color::White,
-                icon_bg: Color::Blue,
-                icon: String::from(" g "),
-                text_fg: Color::Black,
-                text_bg: Color::White,
-                text: String::from(" Google "),
-            },
-        },
-    );
-    engs.insert(
-        "red".to_string(),
-        Engine {
-            name: "Reddit".to_string(),
-            suggestion_url: "https://www.google.com/complete/search?client=chrome&q=%s".to_string(),
-            search_url: "https://www.google.com/search?q=site:reddit.com+%s".to_string(),
-            prompt: Prompt {
-                icon_fg: Color::White,
-                icon_bg: Color::Red,
-                icon: String::from(" ⬬ "),
-                text_fg: Color::Black,
-                text_bg: Color::White,
-                text: String::from(" Reddit "),
-            },
-        },
-    );
-    engs.insert(
-        "wkt".to_string(),
-        Engine {
-            name: "Wiktionary".to_string(),
-            suggestion_url: "https://en.wiktionary.org/w/api.php?action=opensearch&search=%s&limit=10&namespace=0&format=json".to_string(),
-            search_url: "https://en.wiktionary.org/wiki/%s".to_string(),
-            prompt: Prompt {
-                icon_fg: Color::Black,
-                icon_bg: Color::White,
-                icon: String::from(" W "),
-                text_fg: Color::Black,
-                text_bg: Color::White,
-                text: String::from(" Wiktionary (en) "),
-            },
-        },
-    );
-    engs.insert(
-        "yt".to_string(),
-        Engine {
-            name: "YouTube".to_string(),
-            suggestion_url:
-                "http://suggestqueries.google.com/complete/search?client=firefox&ds=yt&q=%s"
-                    .to_string(),
-            search_url: "https://www.youtube.com/results?q=%s".to_string(),
-            prompt: Prompt {
-                icon_fg: Color::White,
-                icon_bg: Color::Red,
-                icon: String::from(" ▶ "),
-                text_fg: Color::Black,
-                text_bg: Color::White,
-                text: String::from(" YouTube "),
-            },
-        },
-    );
-    engs.insert(
-        "r".to_string(),
-        Engine {
-            name: "Subreddit".to_string(),
-            suggestion_url:
-                "https://us-central1-subreddit-suggestions.cloudfunctions.net/suggest?query=%s"
-                    .to_string(),
-            search_url: "https://www.reddit.com/r/%s".to_string(),
-            prompt: Prompt {
-                icon_fg: Color::White,
-                icon_bg: Color::Red,
-                icon: String::from(" ⬬ "),
-                text_fg: Color::Black,
-                text_bg: Color::White,
-                text: String::from(" Subreddit "),
-            },
-        },
-    );
-    engs
-}
 // mirrors opensearch schema
 #[derive(Debug)]
 struct Suggestions {
@@ -430,15 +297,6 @@ struct Suggestions {
     //urls: Vec<String>
 }
 
-#[derive(Clone)]
-struct Prompt {
-    icon_fg: Color,
-    icon_bg: Color,
-    icon: String,
-    text_fg: Color,
-    text_bg: Color,
-    text: String,
-}
 
 enum UiMsg {
     SetSuggestions(Suggestions),
