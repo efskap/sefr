@@ -1,6 +1,8 @@
 use crate::*;
+use serde::{Serialize};
 
 #[allow(dead_code)] // maybe I'll use name later ok
+#[derive(Serialize)]
 pub struct Engine {
     pub prompt: Prompt,
     pub name: String,
@@ -8,15 +10,6 @@ pub struct Engine {
     pub search_url: String,
 }
 
-#[derive(Clone)]
-pub struct Prompt {
-    pub icon_fg: Color,
-    pub icon_bg: Color,
-    pub icon: String,
-    pub text_fg: Color,
-    pub text_bg: Color,
-    pub text: String,
-}
 impl Engine {
     pub fn format_suggestion_url(&self, search_term: &str) -> String {
         self.suggestion_url
@@ -28,6 +21,34 @@ impl Engine {
     }
 }
 
+// fg and bg here are String representations of crossterm::Color for easy serialization
+#[derive(Clone, Serialize)]
+pub struct Prompt {
+    pub icon_fg: Color,
+    pub icon_bg: Color,
+    pub icon: String,
+    pub text_fg: Color,
+    pub text_bg: Color,
+    pub text: String,
+}
+impl Prompt {
+    pub fn draw(self){
+       print!(
+            "{}{}{}{}",
+            Colored::Fg(self.icon_fg),
+            Colored::Bg(self.icon_bg),
+            self.icon,
+            Attribute::Reset
+        ); // icon
+        print!(
+            "{}{}{}{}",
+            Colored::Fg(self.text_fg),
+            Colored::Bg(self.text_bg),
+            self.text,
+            Attribute::Reset
+        ); // promptt text
+    }
+}
 // TODO: this should prolly return slices, not Strings
 pub fn match_engine<'a, 'b>(
     input_line: &'b str,

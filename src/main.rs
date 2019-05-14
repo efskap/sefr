@@ -2,6 +2,7 @@ extern crate crossterm;
 extern crate json;
 extern crate reqwest;
 extern crate webbrowser;
+extern crate serde;
 
 use crossterm::{
     input, Attribute, ClearType, Color, Colored, Crossterm, InputEvent, KeyEvent, RawScreen,
@@ -93,20 +94,8 @@ fn main() {
         }
         cursor.move_left(t_w);
         terminal.clear(ClearType::CurrentLine);
-        print!(
-            "{}{}{}{}",
-            Colored::Fg(prompt.icon_fg),
-            Colored::Bg(prompt.icon_bg),
-            prompt.icon,
-            Attribute::Reset
-        ); // icon
-        print!(
-            "{}{}{}{}",
-            Colored::Fg(prompt.text_fg),
-            Colored::Bg(prompt.text_bg),
-            prompt.text,
-            Attribute::Reset
-        ); // promptt text
+ 
+        prompt.draw();
         println!(" {}_", input_line);
         let suggest_lines = 15; /*if let Some(ref suggs) = suggs {
                                     suggs.sugg_terms.len()
