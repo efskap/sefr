@@ -2,7 +2,7 @@
 
 It's kinda like surfraw but with interactive suggestions (by parsing opensearch json).
 
-![demo gif](https://raw.githubusercontent.com/efskap/sefr/master/demo.gif)
+![](https://github.com/efskap/sefr/raw/master/demo.gif "demo gif")
 
 ## motivation
 
