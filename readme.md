@@ -15,6 +15,10 @@ I use custom url bar search engines a lot, but browser support for them is frust
 
 This is meant to be a customizable crossplat solution, and since it uses your default browser ([details](https://github.com/amodm/webbrowser-rs#examples)), I hope to fit it into my workflow with a global keybinding.
 
+## running
+
+Clone it, install [the Rust toolchain](https://rustup.rs/), and run `cargo run` in the directory.
+
 ## progress
 
 Currently messy and engines are hardcoded.
