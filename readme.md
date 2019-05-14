@@ -1,6 +1,7 @@
 # sefr (Search Engine FRontend)
 
-It's kinda like surfraw but with interactive suggestions (by parsing opensearch json).
+Terminal program for interactively opening search engines / parametric URLs.  
+It's kinda like surfraw but with interactive suggestions (via parsing opensearch json).
 
 ![](https://github.com/efskap/sefr/raw/master/demo.gif "demo gif")
 
