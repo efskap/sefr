@@ -65,9 +65,17 @@ fn main() {
     let (t_w, _t_h) = terminal.terminal_size();
     let mut selected_n: Option<usize> = None;
 
+    let mut prev_engine: Option<&Engine> = None;
     let mut refresh_completions = true;
     loop {
         let (engine, prefix, search_term) = match_engine(&input_line, &engines);
+        if let Some(ref prev_engine) = prev_engine {
+        if prev_engine.suggestion_url != engine.suggestion_url {
+            suggs = None;
+            refresh_completions = true;
+        }
+        }
+        prev_engine = Some(&engine);
         if refresh_completions {
             prompt = &engine.prompt;
             if input_line.is_empty() {
@@ -83,6 +91,7 @@ fn main() {
                 });
             }
             refresh_completions = false;
+            selected_n = None;
         }
         cursor.move_left(t_w);
         terminal.clear(ClearType::CurrentLine);
