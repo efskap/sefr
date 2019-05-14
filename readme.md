@@ -13,6 +13,9 @@ I use custom url bar search engines a lot, but browser support for them is frust
  - Chrome makes defining them easy, syncs them, but doesn't let you specify suggestion endpoints.
  - Vivaldi makes defining them easy, lets you specify suggestion endpoints, but doesn't sync them.
 
+e.g. in stock firefox, you can't create a search engine that, when you type "r foo" in your url bar, automatically goes to "reddit.com/r/foo".
+You have to manually write the URL, and you don't even get completions!
+
 This is meant to be a customizable crossplat solution, and since it uses your default browser ([details](https://github.com/amodm/webbrowser-rs#examples)), I hope to fit it into my workflow with a global keybinding.
 
 ## running
