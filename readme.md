@@ -22,10 +22,13 @@ This is meant to be a customizable crossplat solution, and since it uses your de
 
 Clone it, install [the Rust toolchain](https://rustup.rs/), and run `cargo run` in the directory.
 
+You can also install it with `cargo install sefr`.
+
 Keybindings are hardcoded right now, and they are:
 
 - Tab/Down/Ctrl-N => Select next suggestion
 - Shift-Tab/Up/Ctrl-P => Select previous suggestion
+- Ctrl-W => Delete last word
 - Ctrl-C => Exit
 - Enter => Perform selected search in browser
 
@@ -37,9 +40,9 @@ You can leave out the prompt section when adding new engines and it'll use the d
 
 So in that sense, the only _required_ parameters for a new engine are:
 
-- name
-- search_url (opened in browser with `%s` replaced by the search term upon hitting enter)
-- suggestion_url (endpoint returning [OpenSearch suggestions schema json](http://www.opensearch.org/Specifications/OpenSearch/Extensions/Suggestions) with `%s` replaced by the search term, queried for suggestions while typing)
+- `name`
+- `search_url` (opened in browser with `%s` replaced by the search term upon hitting enter)
+- `suggestion_url` (endpoint returning [OpenSearch suggestions schema json](http://www.opensearch.org/Specifications/OpenSearch/Extensions/Suggestions) with `%s` replaced by the search term, queried for suggestions while typing)
 
 The engine used when no prefix is entered is defined as `_default` in the config, and it is obligatory for the program to start.
 
@@ -66,5 +69,7 @@ Currently messy but it's working.
 - [x] Browser launching
 - [x] Selection of suggestions w/ prefix edge cases
 - [x] TOML file config
-- [ ] Use real cursor for rendering input buffer
+- [ ] Use real cursor for rendering input buffer, and be able to move it
 - [ ] Configurable keybindings
+- [ ] Better feedback for when suggestion endpoints misbehave
+- [ ] CLI args, e.g. providing the initial input buffer through an argument for aliasing.
