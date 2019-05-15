@@ -26,13 +26,33 @@ Clone it, install [the Rust toolchain](https://rustup.rs/), and run `cargo run` 
 
 Generates a TOML file in the the config dir provided by the [directories crate](https://crates.io/crates/directories) (the usual ones, e.g. ~/.config/sefr/config.toml on linux). Should be pretty straightforward to add new search engines but sorry if I break the format between development versions.
 
+You can leave out the prompt section when adding new engines and it'll use the default one. Also if you leave out the prompt text (or the entire prompt section) it'll display the engine's "name" parameter there.
+
+So in that sense, the only _required_ parameters for a new engine are:
+
+- name
+- search_url (opened in browser with `%s` replaced by the search term upon hitting enter)
+- suggestion_url (endpoint returning (OpenSearch suggestions schema json)[http://www.opensearch.org/Specifications/OpenSearch/Extensions/Suggestions] with `%s` replaced by the search term, queried for suggestions while typing)
+
+The engine used when no prefix is entered is defined as `_default` in the config.
+
+So, minimal config.toml file:
+
+```toml
+[engines._default]
+name = "Google"
+search_url = "https://www.google.com/search?q=%s"
+suggestion_url = "https://www.google.com/complete/search?client=chrome&q=%s"
+```
+
 ## progress
 
 Currently messy but it's working.
 
-- [x] Prompt (albeit with fake cursor)
+- [x] Prompt
 - [x] Suggestions request / json parse
 - [x] Definable engines with prefixes, prompts, and endpoints
 - [x] Browser launching
 - [x] Selection of suggestions w/ prefix edge cases
 - [x] TOML file config
+- [ ] Use real cursor for rendering input buffer
