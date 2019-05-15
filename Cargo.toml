@@ -3,9 +3,15 @@ name = "sefr"
 version = "0.2.0"
 authors = ["Dmitry Narkevich <me@dmitry.lol>"]
 edition = "2018"
+description = "Terminal program for interactively opening search engines / parametric URLs."
+repository = "https://github.com/efskap/sefr"
+readme = "readme.md"
+keywords = ["terminal", "search"]
+categories = ["command-line-utilities"]
+license = "GPL-3.0-or-later"
 
 [dependencies]
-crossterm = { git = "https://github.com/TimonPost/crossterm", rev="83b4a27ca3d774fcc8b08e09c3c50a04922a76c9" }
+crossterm = "0.9.4"
 reqwest = "0.9"
 json = "0.11"
 webbrowser = "0.5"
