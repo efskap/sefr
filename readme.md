@@ -22,6 +22,13 @@ This is meant to be a customizable crossplat solution, and since it uses your de
 
 Clone it, install [the Rust toolchain](https://rustup.rs/), and run `cargo run` in the directory.
 
+Keybindings are hardcoded right now, and they are:
+
+- Tab/Down/Ctrl-N => Select next suggestion
+- Shift-Tab/Up/Ctrl-P => Select previous suggestion
+- Ctrl-C => Exit
+- Enter => Perform selected search in browser
+
 ## config
 
 Generates a TOML file in the the config dir provided by the [directories crate](https://crates.io/crates/directories) (the usual ones, e.g. ~/.config/sefr/config.toml on linux). Should be pretty straightforward to add new search engines but sorry if I break the format between development versions.
@@ -56,3 +63,4 @@ Currently messy but it's working.
 - [x] Selection of suggestions w/ prefix edge cases
 - [x] TOML file config
 - [ ] Use real cursor for rendering input buffer
+- [ ] Configurable keybindings
