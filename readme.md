@@ -34,7 +34,7 @@ So in that sense, the only _required_ parameters for a new engine are:
 - search_url (opened in browser with `%s` replaced by the search term upon hitting enter)
 - suggestion_url (endpoint returning [OpenSearch suggestions schema json](http://www.opensearch.org/Specifications/OpenSearch/Extensions/Suggestions) with `%s` replaced by the search term, queried for suggestions while typing)
 
-The engine used when no prefix is entered is defined as `_default` in the config.
+The engine used when no prefix is entered is defined as `_default` in the config, and it is obligatory for the program to start.
 
 So, minimal config.toml file:
 
