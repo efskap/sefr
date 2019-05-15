@@ -52,6 +52,10 @@ search_url = "https://www.google.com/search?q=%s"
 suggestion_url = "https://www.google.com/complete/search?client=chrome&q=%s"
 ```
 
+Fields are all strings except for colors (`*_bg`, `*_fg`). They can be strings (corresponding to [the color names here](https://github.com/TimonPost/crossterm/blob/master/crossterm_style/src/enums/color.rs)), 8-bit numbers (corresponding to [Ansi color codes](https://jonasjacek.github.io/colors/)), or 8-bit RGB tuples like `[255,255,255]`
+
+The default config it generates is much less minimal, demonstrating prompt customization.
+
 ## progress
 
 Currently messy but it's working.
