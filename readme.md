@@ -24,11 +24,11 @@ Clone it, install [the Rust toolchain](https://rustup.rs/), and run `cargo run` 
 
 ## progress
 
-Currently messy and engines are hardcoded.
+Currently messy but it's working.
 
 - [x] Prompt (albeit with fake cursor)
 - [x] Suggestions request / json parse
 - [x] Definable engines with prefixes, prompts, and endpoints
 - [x] Browser launching
 - [x] Selection of suggestions w/ prefix edge cases
-- [ ] File based config
+- [x] TOML file config
