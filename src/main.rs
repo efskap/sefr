@@ -1,8 +1,10 @@
 extern crate crossterm;
+extern crate directories;
 extern crate json;
 extern crate reqwest;
-extern crate webbrowser;
 extern crate serde;
+extern crate toml;
+extern crate webbrowser;
 
 use crossterm::{
     input, Attribute, ClearType, Color, Colored, Crossterm, InputEvent, KeyEvent, RawScreen,
@@ -20,6 +22,8 @@ use engine::*;
 fn main() {
     let (tx, rx) = mpsc::channel();
 
+    let config = get_config();
+    let engines = config.engines;
     let _screen = RawScreen::into_raw_mode();
     let crossterm = Crossterm::new();
     let mut cursor = crossterm.cursor();
@@ -29,7 +33,6 @@ fn main() {
     let mut stdin = input.read_sync();
     let mut input_buf = String::new();
 
-    let engines = define_engines();
     let input_tx = tx.clone();
     let input_thread = thread::spawn(move || {
         let mut should_quit = false;
@@ -94,7 +97,7 @@ fn main() {
         }
         cursor.move_left(t_w);
         terminal.clear(ClearType::CurrentLine);
- 
+
         prompt.draw();
         println!(" {}_", input_line);
         let suggest_lines = 15; /*if let Some(ref suggs) = suggs {
@@ -276,7 +279,6 @@ fn fetch_suggs(url: String) -> Result<Suggestions, Box<std::error::Error>> {
     Ok(Suggestions { term, sugg_terms })
 }
 
-
 // mirrors opensearch schema
 #[derive(Debug)]
 struct Suggestions {
@@ -285,7 +287,6 @@ struct Suggestions {
     //descriptions: Vec<String>,
     //urls: Vec<String>
 }
-
 
 enum UiMsg {
     SetSuggestions(Suggestions),

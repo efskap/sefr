@@ -5,9 +5,10 @@ authors = ["Dmitry Narkevich <me@dmitry.lol>"]
 edition = "2018"
 
 [dependencies]
-crossterm = { git = "https://github.com/TimonPost/crossterm" }
+crossterm = { git = "https://github.com/TimonPost/crossterm", rev="83b4a27ca3d774fcc8b08e09c3c50a04922a76c9" }
 reqwest = "0.9"
 json = "0.11"
 webbrowser = "0.5"
 toml = "0.4"
-serde = { version = "1.0", features = ["derive"] }
+serde = {version = "1.0", features = ["derive"]}
+directories = "1.0"
