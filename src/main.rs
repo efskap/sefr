@@ -18,7 +18,7 @@
 extern crate crossterm;
 extern crate directories;
 extern crate json;
-extern crate reqwest;
+extern crate minreq;
 extern crate serde;
 extern crate toml;
 extern crate webbrowser;
@@ -286,7 +286,7 @@ fn main() {
 }
 
 fn fetch_suggs(url: String) -> Result<Suggestions, Box<std::error::Error>> {
-    let text = reqwest::get(&url)?.text()?;
+    let text = minreq::get(url).send()?.body;
     let data = json::parse(&text)?;
     let term = data[0]
         .as_str()

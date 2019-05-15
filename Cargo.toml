@@ -1,6 +1,6 @@
 [package]
 name = "sefr"
-version = "0.2.1"
+version = "0.2.2"
 authors = ["Dmitry Narkevich <me@dmitry.lol>"]
 edition = "2018"
 description = "Terminal program for interactively opening search engines / parametric URLs."
@@ -12,7 +12,7 @@ license = "GPL-3.0-or-later"
 
 [dependencies]
 crossterm = "0.9.4"
-reqwest = "0.9"
+minreq = { version = "1.1.2", features = ["https"] }
 json = "0.11"
 webbrowser = "0.5"
 toml = "0.4"
