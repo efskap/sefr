@@ -22,6 +22,10 @@ This is meant to be a customizable crossplat solution, and since it uses your de
 
 Clone it, install [the Rust toolchain](https://rustup.rs/), and run `cargo run` in the directory.
 
+## config
+
+Generates a TOML file in the the config dir provided by the [directories crate](https://crates.io/crates/directories) (the usual ones, e.g. ~/.config/sefr/config.toml on linux). Should be pretty straightforward to add new search engines but sorry if I break the format between development versions.
+
 ## progress
 
 Currently messy but it's working.
