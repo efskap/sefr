@@ -52,7 +52,8 @@ suggestion_url = "http://suggestqueries.google.com/complete/search?client=firefo
 - `name` is the name of the engine, used for the prompt text if not defined in the prompt section (more on that later).
 - `search_url` is opened in your browser with `%s` replaced by the search term when enter is pressed.
 - `suggestion_url` (optional) is the endpoint queried for suggestions (with `%s` replaced by the search term) while typing. It must return  [OpenSearch suggestions schema json](http://www.opensearch.org/Specifications/OpenSearch/Extensions/Suggestions).
-- `space_becomes` (optional, `+` by default) is what spaces are replaced with before `search_url` is opened. In the default config:
+- `space_becomes` (optional, `+` by default) is what spaces are replaced with before `search_url` is opened.  
+In the default config:
   - `engines.wkt` has it set to `_`, because that's how Wiktionary (and Wikis in general) encode spaces in their URLs.
   - `engines.r` has it set to a blank string, because subreddits can't have spaces in their names (note that this value prevents spaces from being entered into the input buffer when the engine is selected so that space can be used to select a suggestion without performing a search).
 
