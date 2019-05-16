@@ -88,11 +88,11 @@ If this section is left out then `sefr` will use the default prompt for the `_de
 
 For the time being, keybindings are hardcoded and they can be found below:
 
-- Tab/Down/Ctrl-N => Select next suggestion
-- Shift-Tab/Up/Ctrl-P => Select previous suggestion
-- Ctrl-W => Delete last word
-- Ctrl-C => Exit
-- Enter => Perform selected search in browser
+- `Tab/Down/Ctrl-N` => Select next suggestion
+- `Shift-Tab/Up/Ctrl-P` => Select previous suggestion
+- `Ctrl-W` => Delete last word
+- `Ctrl-C` => Exit
+- `Enter` => Perform selected search in browser
 
 ## Progress
 
