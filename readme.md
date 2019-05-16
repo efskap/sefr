@@ -1,5 +1,7 @@
 # sefr (Search Engine FRontend)
 
+![Crates.io](https://img.shields.io/crates/v/sefr.svg) ![Crates.io](https://img.shields.io/crates/d/sefr.svg)
+
 Terminal program for interactively opening search engines / parametric URLs.  
 It's kinda like surfraw but with interactive suggestions (via parsing opensearch json).
 
