@@ -35,7 +35,7 @@ On its first startup, `sefr` will automatically generate a TOML configuration fi
 e.g. For Linux, the config file will be found in `~/.config/sefr/config.toml`.
 
 ### Adding new engines
-** Warning: The current configuration format might be changed in the future!**
+__Warning: The current configuration format might be changed in the future!__
 
 New engines can be added for use by `sefr` by adding them to the `config.toml` file. Each engine has a mandatory section consisting of the following:
 
@@ -73,12 +73,12 @@ text_fg = "Black"
 ```
 
 The following fields are supported:
-- icon: the icon displayed in the prompt
-- icon_bg: background color of the icon
-- icon_fg: foreground color of the icon
-- text: The text displayed after the icon in the prompt
-- text_bg: background color for the text
-- text_fg: foreground color for the text
+- `icon`: the icon displayed in the prompt
+- `icon_bg`: background color of the icon
+- `icon_fg`: foreground color of the icon
+- `text`: The text displayed after the icon in the prompt
+- `text_bg`: background color for the text
+- `text_fg`: foreground color for the text
 
 The fields are all strings except for colors (`*_bg`, `*_fg`). They can be strings (corresponding to [the color names here](https://github.com/TimonPost/crossterm/blob/master/crossterm_style/src/enums/color.rs)), 8-bit numbers (corresponding to [Ansi color codes](https://jonasjacek.github.io/colors/)), or 8-bit RGB tuples like `[255,255,255]`
 
