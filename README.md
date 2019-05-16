@@ -1,6 +1,6 @@
 # sefr (Search Engine FRontend)
 
-[![Crates.io](https://img.shields.io/crates/v/sefr.svg) ![Crates.io](https://img.shields.io/crates/d/sefr.svg)](https://crates.io/crate/sefr)
+[![Crates.io](https://img.shields.io/crates/v/sefr.svg) ![Crates.io](https://img.shields.io/crates/d/sefr.svg)](https://crates.io/crates/sefr)
 
 Terminal program for interactively opening search engines / parametric URLs.  
 It's kinda like surfraw but with interactive suggestions (via parsing opensearch json).
@@ -30,7 +30,7 @@ There are two ways to install `sefr`:
 ## Configuration/Customatization
 
 ### Config file
-On its first startup, `sefr` will automatically generate a TOML configuration file in the directory provided by the [directories crate](https://crates.io/crates/directories). Any subsequent changes should be made inside it.
+On its first startup, `sefr` will automatically generate a TOML configuration file in the config directory provided by the [directories crate](https://crates.io/crates/directories). Any subsequent changes should be made inside it.
 
 e.g. For Linux, the config file will be found in `~/.config/sefr/config.toml`.
 
