@@ -39,7 +39,7 @@ __Warning: The current configuration format might be changed in the future!__
 
 New engines can be added for use by `sefr` by adding them to the `config.toml` file. 
 
-A basic engine definition looks like this, and all fields are mandatory:
+A basic engine definition looks like this:
 
 ```toml
 [engines.yt]
@@ -51,7 +51,7 @@ suggestion_url = "http://suggestqueries.google.com/complete/search?client=firefo
 - `[engines.PREFIX]` defines what _prefix_ (also known as a _keyword_ or _trigger_) activates the engine.
 - `name` is the name of the engine, used for the prompt text if not defined in the prompt section (more on that later).
 - `search_url` is opened in your browser with `%s` replaced by the search term when enter is pressed.
-- `suggestion_url` is the endpoint queried for suggestions (with `%s` replaced by the search term) while typing. It must return  [OpenSearch suggestions schema json](http://www.opensearch.org/Specifications/OpenSearch/Extensions/Suggestions).
+- `suggestion_url` (optional) is the endpoint queried for suggestions (with `%s` replaced by the search term) while typing. It must return  [OpenSearch suggestions schema json](http://www.opensearch.org/Specifications/OpenSearch/Extensions/Suggestions).
 
 The engine used when no prefix is entered is defined as `_default` in the config, and it is obligatory for the program to start. Example:
 
