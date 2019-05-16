@@ -242,7 +242,11 @@ fn main() {
                                 }
                             }
                             KeyEvent::Char(character) => {
-                                input_line.push(character as char);
+                                // if we don't want spaces in the search term, like with subreddits
+                                // just make space only select a suggestion if one is highlighted
+                                if ! (character == ' ' && engine.space_becomes.is_empty()) {
+                                    input_line.push(character as char);
+                                }
                                 selected_n = None;
                             }
 

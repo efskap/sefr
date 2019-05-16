@@ -41,6 +41,8 @@ pub struct Engine {
     #[serde(default)]
     pub suggestion_url: String,
     pub search_url: String,
+    #[serde(default = "_default_space_becomes", skip_serializing_if = "_is_default_space_becomes")]
+    pub space_becomes: String,
 }
 
 impl Engine {
@@ -50,7 +52,7 @@ impl Engine {
     }
     pub fn format_search_url(&self, search_term: &str) -> String {
         self.search_url
-            .replace("%s", &search_term.replace(" ", "+"))
+            .replace("%s", &search_term.replace(" ", &self.space_becomes))
     }
 }
 
@@ -87,10 +89,16 @@ pub struct Prompt {
     pub text: String,
 }
 fn _default_name() -> String {
-    DEFAULT_NAME.to_string()
+    DEFAULT_NAME.into()
 }
 fn _is_default_name(s: &str) -> bool {
     s == _default_name()
+}
+fn _default_space_becomes() -> String {
+    "+".into()
+}
+fn _is_default_space_becomes(s: &str) -> bool {
+    s == _default_space_becomes()
 }
 fn _white() -> Color {
     Color::White
@@ -354,6 +362,7 @@ fn get_default_config() -> Config {
             name: "Google".to_string(),
             suggestion_url: "https://www.google.com/complete/search?client=chrome&q=%s".to_string(),
             search_url: "https://www.google.com/search?q=%s".to_string(),
+            space_becomes: "+".into(),
             prompt: Prompt {
                 icon_fg: Color::White,
                 icon_bg: Color::Blue,
@@ -370,6 +379,7 @@ fn get_default_config() -> Config {
             name: "Reddit".to_string(),
             suggestion_url: "https://www.google.com/complete/search?client=chrome&q=%s".to_string(),
             search_url: "https://www.google.com/search?q=site:reddit.com+%s".to_string(),
+            space_becomes: "+".into(),
             prompt: Prompt {
                 icon_fg: Color::White,
                 icon_bg: Color::Rgb {
@@ -390,6 +400,7 @@ fn get_default_config() -> Config {
             name: "Wiktionary".to_string(),
             suggestion_url: "https://en.wiktionary.org/w/api.php?action=opensearch&search=%s&limit=10&namespace=0&format=json".to_string(),
             search_url: "https://en.wiktionary.org/wiki/%s".to_string(),
+            space_becomes: "_".into(),
             prompt: Prompt {
                 icon_fg: Color::Black,
                 icon_bg: Color::White,
@@ -408,6 +419,7 @@ fn get_default_config() -> Config {
                 "http://suggestqueries.google.com/complete/search?client=firefox&ds=yt&q=%s"
                     .to_string(),
             search_url: "https://www.youtube.com/results?q=%s".to_string(),
+            space_becomes: "+".into(),
             prompt: Prompt {
                 icon_fg: Color::White,
                 icon_bg: Color::Red,
@@ -426,6 +438,7 @@ fn get_default_config() -> Config {
                 "https://us-central1-subreddit-suggestions.cloudfunctions.net/suggest?query=%s"
                     .to_string(),
             search_url: "https://www.reddit.com/r/%s".to_string(),
+            space_becomes: "".into(), // subreddits dont have spaces
             prompt: Prompt {
                 icon_fg: Color::White,
                 icon_bg: Color::Rgb {
