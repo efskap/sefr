@@ -27,7 +27,7 @@ There are two ways to install `sefr`:
 2. Install via cargo by calling `cargo install sefr`. This should make it runnable from anywhere.
 
 
-## Configuration/Customatization
+## Configuration  / Customization
 
 ### Config file
 On its first startup, `sefr` will automatically generate a TOML configuration file in the config directory provided by the [directories crate](https://crates.io/crates/directories). Any subsequent changes should be made inside it.
