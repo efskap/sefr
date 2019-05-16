@@ -374,6 +374,23 @@ fn get_default_config() -> Config {
         },
     );
     engs.insert(
+        "g".to_string(),
+        Engine {
+            name: "Google (I'm Feeling Lucky)".to_string(),
+            suggestion_url: "https://www.google.com/complete/search?client=chrome&q=%s".to_string(),
+            search_url: "https://www.google.com/search?btnI&q=%s".to_string(),
+            space_becomes: "+".into(),
+            prompt: Prompt {
+                icon_fg: Color::White,
+                icon_bg: Color::Blue,
+                icon: String::from(" g "),
+                text_fg: Color::Black,
+                text_bg: Color::White,
+                text: " I'm Feeling Lucky ".into()
+            },
+        },
+    );
+    engs.insert(
         "red".to_string(),
         Engine {
             name: "Reddit".to_string(),
@@ -390,7 +407,7 @@ fn get_default_config() -> Config {
                 icon: String::from(" ⬬ "),
                 text_fg: Color::Black,
                 text_bg: Color::White,
-                text: DEFAULT_NAME.to_string(),
+                text: DEFAULT_NAME.into()
             },
         },
     );
@@ -398,8 +415,25 @@ fn get_default_config() -> Config {
         "wkt".to_string(),
         Engine {
             name: "Wiktionary".to_string(),
-            suggestion_url: "https://en.wiktionary.org/w/api.php?action=opensearch&search=%s&limit=10&namespace=0&format=json".to_string(),
+            suggestion_url: "https://en.wiktionary.org/w/api.php?action=opensearch&search=%s&limit=15&namespace=0&format=json".to_string(),
             search_url: "https://en.wiktionary.org/wiki/%s".to_string(),
+            space_becomes: "_".into(),
+            prompt: Prompt {
+                icon_fg: Color::Black,
+                icon_bg: Color::White,
+                icon: String::from("['w]"),
+                text_fg: Color::Black,
+                text_bg: Color::White,
+                text: DEFAULT_NAME.into()
+            },
+        },
+    );
+    engs.insert(
+        "w".to_string(),
+        Engine {
+            name: "Wikipedia".to_string(),
+            suggestion_url: "https://en.wikipedia.org/w/api.php?action=opensearch&search=%s&limit=15&namespace=0&format=json".to_string(),
+            search_url: "https://en.wikipedia.org/wiki/%s".to_string(),
             space_becomes: "_".into(),
             prompt: Prompt {
                 icon_fg: Color::Black,
@@ -407,7 +441,7 @@ fn get_default_config() -> Config {
                 icon: String::from(" W "),
                 text_fg: Color::Black,
                 text_bg: Color::White,
-                text: String::from(" Wiktionary (en) "),
+                text: DEFAULT_NAME.into()
             },
         },
     );
@@ -426,7 +460,7 @@ fn get_default_config() -> Config {
                 icon: String::from(" ▶ "),
                 text_fg: Color::Black,
                 text_bg: Color::White,
-                text: DEFAULT_NAME.to_string(),
+                text: DEFAULT_NAME.into()
             },
         },
     );
@@ -449,7 +483,7 @@ fn get_default_config() -> Config {
                 icon: String::from(" ⬬ "),
                 text_fg: Color::Black,
                 text_bg: Color::White,
-                text: String::from(" Subreddit "),
+                text: DEFAULT_NAME.into()
             },
         },
     );
