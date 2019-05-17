@@ -32,6 +32,13 @@ A convenient way to integrate it into your desktop environment is by mapping a g
 uxterm  -geometry 60x20+620+200 -fa 'Monospace' -fs 13 -bg grey27 -fg white -e ~/sefr/target/debug/sefr
 ```
 
+For i3 + suckless terminal, this works well. Not sure why I have to specify `$BROWSER`.
+
+```sh
+for_window [instance="^sefr$"] floating enable, resize set 640 480, move position center
+bindsym Mod4+s exec BROWSER=/usr/bin/firefox st -n sefr -f 'Monospace:size=14' -e ~/sefr/target/debug/sefr
+```
+
 ## Configuration  / Customization
 
 ### Config file
