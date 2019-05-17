@@ -18,7 +18,7 @@ I use custom url bar search engines a lot, but browser support for them is frust
 e.g. in stock Firefox, you can't create a search engine that, when you type "r foo" in your url bar, automatically goes to "reddit.com/r/foo".
 You have to manually write the URL, and you don't even get completions!
 
-This is meant to be a customizable crossplatform solution, and since it uses your default browser ([more details](https://github.com/amodm/webbrowser-rs#examples)), I hope to fit it into my workflow with a global keybinding.
+This is meant to be a customizable crossplatform solution, and since it uses your default browser ([more details](https://github.com/amodm/webbrowser-rs#examples)), you can integrate it into a GUI workflow with a global hotkey (see below).
 
 ## Installation
 
@@ -26,6 +26,11 @@ There are two ways to install `sefr`:
 1. Clone this repository, install [the Rust toolchain](https://rustup.rs/), and either call `cargo run` in the cloned directory to try it out, or `cargo build` to create a binary located at `target/debug/sefr`.
 2. Install via cargo by calling `cargo install sefr`. This should make it runnable from anywhere.
 
+A convenient way to integrate it into your desktop environment is by mapping a global hotkey to launch it in a lightweight terminal. For example, bind this to a convenient hotkey in your DE or WM and change the last argument to point at the binary.
+
+```sh
+uxterm  -geometry 60x20+620+200 -fa 'Monospace' -fs 13 -bg grey27 -fg white -e ~/sefr/target/debug/sefr
+```
 
 ## Configuration  / Customization
 
