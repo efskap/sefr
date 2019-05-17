@@ -35,6 +35,7 @@ use std::thread;
 mod engine;
 use engine::*;
 
+
 #[allow(unused_must_use)]
 fn main() {
     let (tx, rx) = mpsc::channel();
@@ -180,7 +181,6 @@ fn main() {
                                 webbrowser::open(&url).expect("Couldn't open browser.");
                                 break;
                             }
-                            // TODO: clean up brutal code reuse here
                             KeyEvent::Char('\t') | KeyEvent::Ctrl('n') | KeyEvent::Down => {
                                 if let Some(ref suggs) = suggs {
                                     selected_n = Some(if let Some(selected_n) = selected_n {
@@ -196,19 +196,7 @@ fn main() {
                                     {
                                         let (_, interfering_prefix, _) =
                                             match_engine(&selected, &engines);
-                                        if !interfering_prefix.is_empty() {
-                                            if interfering_prefix == prefix {
-                                                input_line =
-                                                    format!("{} {}", prefix, selected.to_string());
-                                            } else {
-                                                input_line = format!("?{}", selected.to_string());
-                                            }
-                                        } else if !prefix.is_empty() {
-                                            input_line =
-                                                format!("{} {}", prefix, selected.to_string());
-                                        } else {
-                                            input_line = format!("{}", selected.to_string());
-                                        }
+                                        input_line = input_line_from_selection(&interfering_prefix, &prefix,  &selected);
                                         refresh_completions = false;
                                     }
                                 }
@@ -224,19 +212,7 @@ fn main() {
                                     {
                                         let (_, interfering_prefix, _) =
                                             match_engine(&selected, &engines);
-                                        if !interfering_prefix.is_empty() {
-                                            if interfering_prefix == prefix {
-                                                input_line =
-                                                    format!("{} {}", prefix, selected.to_string());
-                                            } else {
-                                                input_line = format!("?{}", selected.to_string());
-                                            }
-                                        } else if !prefix.is_empty() {
-                                            input_line =
-                                                format!("{} {}", prefix, selected.to_string());
-                                        } else {
-                                            input_line = format!("{}", selected.to_string());
-                                        }
+                                        input_line = input_line_from_selection(&interfering_prefix, &prefix,  &selected);
                                         refresh_completions = false;
                                     }
                                 }
@@ -289,6 +265,28 @@ fn main() {
     input_thread.join();
 }
 
+fn input_line_from_selection(prefix_in_result: &str, current_prefix: &str, selected_result: &str) -> String{
+    if !prefix_in_result.is_empty() {
+        // selected_result starts with a prefix that matches one of our engines
+        if !current_prefix.is_empty() {
+            // but we already have a prefix entered, so no escaping needed
+            // just use the result while keeping our existing prefix
+            format!("{} {}", current_prefix, selected_result)
+        } else {
+            // don't want the prefix in the result to trigger an engine, so escape it
+            format!("?{}", selected_result)
+        }
+    } else  {
+        // no conflict, so just use the result while keeping our existing prefix
+        if !current_prefix.is_empty() {
+            format!("{} {}", current_prefix, selected_result)
+        } else {
+            // our prefix is empty, and the result doesn't start with a prefix
+            // this is a separate branch so that a space isn't inserted before the result
+            format!("{}", selected_result)
+        }
+    }
+}
 fn fetch_suggs(url: String) -> Result<Suggestions, Box<std::error::Error>> {
     let text = minreq::get(url).send()?.body;
     let data = json::parse(&text)?;
