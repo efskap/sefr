@@ -106,7 +106,7 @@ If this section is left out for a particular engine, a basic prompt displaying t
 
 ### Keybindings
 
-Keybindings are a work in progress, but all of the current functions are rebindable. Keybinds are in a vim-like syntax (e.g. `<Down>`, `<C-w>`, `<F12>` under the `[keybinds]` section, but there are a few things to note:
+Keybindings are a work in progress, but all of the current functions are rebindable under the `[keybinds]` section. Keybinds are in a vim-like syntax (e.g. `<Down>`, `<C-w>`, `<F12>`), but there are a few things to note:
 
 - The binding and action are double quoted. So the entire binding is a line like `"<Backspace>" = "DeleteChar"`.
 
