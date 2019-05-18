@@ -126,6 +126,15 @@ Keybindings are a work in progress, but all of the current functions are rebinda
 
 - If you assign two functions two the same key, the one registered later will override the first.
 
+Excerpt from the default config:
+
+```toml
+[keybinds]
+"<BackTab>" = "SelectPrev"
+"<Backspace>" = "DeleteChar"
+"<C-c>" = "Exit"
+```
+
 ## Progress
 
 This project is currently in its **alpha** stage but is relatively stable.
