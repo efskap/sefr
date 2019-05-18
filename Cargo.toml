@@ -1,6 +1,6 @@
 [package]
 name = "sefr"
-version = "0.2.3"
+version = "0.3.0"
 authors = ["Dmitry Narkevich <me@dmitry.lol>"]
 edition = "2018"
 description = "Terminal program for interactively opening search engines / parametric URLs."
