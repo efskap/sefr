@@ -106,13 +106,37 @@ If this section is left out for a particular engine, a basic prompt displaying t
 
 ### Keybindings
 
-For the time being, keybindings are hardcoded and they can be found below:
+Keybindings are a work in progress, but all of the current functions are rebindable under the `[keybinds]` section.   
+Keybinds are in a vim-like syntax (e.g. `<Down>`, `<C-w>`, `<F12>`), but there are a few things to note:
 
-- `Tab/Down/Ctrl-N` => Select next suggestion
-- `Shift-Tab/Up/Ctrl-P` => Select previous suggestion
-- `Ctrl-W` => Delete last word
-- `Ctrl-C` => Exit
-- `Enter` => Perform selected search in browser
+- The binding and action are double quoted. So the entire binding is a line like `"<Backspace>" = "DeleteChar"`.
+
+- All bindings are in <angle brackets> except single characters (e.g. the literal letter `p`, as in `"p" = "Exit"`).    
+ But why would you make a binding like that?
+
+- `Ctrl` is represented by `C-` (e.g. `<C-w>` means 'control + w'). `Alt` is represented by either `A-` or `M-`.
+
+- Everything inside `<`angle brackets`>` is case-insensitive except the normal key after a modifier.    
+That is, `<a-p>`, `<A-p>`, `<m-p>`, and `<M-p>` all mean the same thing ('alt + p') but `<m-P>` means 'alt + shift + p'.
+
+- So that means there is no "shift" modifier. To register 'alt + shift + s' you'd write `<a-S>` or `<A-S>`.
+
+- 'shift + tab' is represented by `<Backtab>`.
+
+- 'enter' can be `<CR>` or `<Enter>`. 'backspace' can be `<BS>` or `<Backspace>`.
+
+- An empty string represents the `NULL` character, whatever that is.
+
+- If you assign two functions two the same key, the one registered later will override the first.
+
+Excerpt from the default config:
+
+```toml
+[keybinds]
+"<BackTab>" = "SelectPrev"
+"<Backspace>" = "DeleteChar"
+"<C-c>" = "Exit"
+```
 
 ## Progress
 
@@ -125,6 +149,6 @@ This project is currently in its **alpha** stage but is relatively stable.
 - [x] Selection of suggestions w/ prefix edge cases
 - [x] TOML file config
 - [ ] Use real cursor for rendering input buffer, and be able to move it
-- [ ] Configurable keybindings
+- [x] Configurable keybindings
 - [ ] Better feedback for when suggestion endpoints misbehave
 - [ ] CLI args, e.g. providing the initial input buffer through an argument for aliasing.

@@ -32,9 +32,11 @@ use std::collections::HashMap;
 use std::result::Result;
 use std::sync::mpsc;
 use std::thread;
-mod engine;
-use engine::*;
 
+mod config;
+mod engine;
+use config::*;
+use engine::*;
 
 #[allow(unused_must_use)]
 fn main() {
@@ -51,29 +53,33 @@ fn main() {
     let mut stdin = input.read_sync();
     let mut input_buf = String::new();
 
+    let keybindings = config.keybinds;
     let input_tx = tx.clone();
-    let input_thread = thread::spawn(move || {
-        let mut should_quit = false;
-        loop {
-            let key = stdin.next();
-            if let Some(ie) = &key {
-                match ie {
-                    InputEvent::Keyboard(k) => match k {
-                        KeyEvent::Char('\n') => {
-                            should_quit = true;
+    let input_thread = thread::spawn(move || loop {
+        let key = stdin.next();
+        match key {
+            Some(InputEvent::Keyboard(k)) => {
+                let keybind = KeyBind { 0: k };
+                match keybindings.get(&keybind) {
+                    Some(BindableAction::Submit) => {
+                        input_tx.send(UiMsg::OnInput(BindableAction::Submit));
+                        break;
+                    }
+                    Some(BindableAction::Exit) => {
+                        input_tx.send(UiMsg::OnInput(BindableAction::Exit));
+                        break;
+                    }
+                    Some(act) => {
+                        input_tx.send(UiMsg::OnInput(act.clone()));
+                    }
+                    None => {
+                        if let KeyEvent::Char(c) = keybind.0 {
+                            input_tx.send(UiMsg::OnInput(BindableAction::AddChar(c)));
                         }
-                        KeyEvent::Ctrl('c') => {
-                            should_quit = true;
-                        }
-                        _ => {}
-                    },
-                    _ => {}
+                    }
                 }
-            };
-            input_tx.send(UiMsg::OnInput(key));
-            if should_quit {
-                break;
             }
+            _ => {}
         }
     });
 
@@ -166,93 +172,88 @@ fn main() {
             UiMsg::OnInput(key) => {
                 refresh_completions = true;
                 match key {
-                    Some(ie) => match ie {
-                        InputEvent::Keyboard(k) => match k {
-                            KeyEvent::Char('\n') => {
-                                input_buf.clear();
-                                let url = engine.format_search_url(&search_term);
-                                for _ in 0..suggest_lines {
-                                    cursor.move_up(1);
-                                    terminal.clear(ClearType::CurrentLine);
-                                }
-                                cursor.move_left(t_w);
-                                println!("Opening {}", url);
-                                terminal.clear(ClearType::CurrentLine);
-                                webbrowser::open(&url).expect("Couldn't open browser.");
-                                break;
+                    BindableAction::Submit => {
+                        input_buf.clear();
+                        let url = engine.format_search_url(&search_term);
+                        for _ in 0..suggest_lines {
+                            cursor.move_up(1);
+                            terminal.clear(ClearType::CurrentLine);
+                        }
+                        cursor.move_left(t_w);
+                        println!("Opening {}", url);
+                        terminal.clear(ClearType::CurrentLine);
+                        webbrowser::open(&url).expect("Couldn't open browser.");
+                        break;
+                    }
+                    BindableAction::SelectNext => {
+                        if let Some(ref suggs) = suggs {
+                            selected_n = Some(if let Some(selected_n) = selected_n {
+                                selected_n + 1
+                            } else {
+                                0
+                            });
+                            if selected_n.unwrap() >= selectable_lines {
+                                selected_n = Some(0);
                             }
-                            KeyEvent::Char('\t') | KeyEvent::Ctrl('n') | KeyEvent::Down => {
-                                if let Some(ref suggs) = suggs {
-                                    selected_n = Some(if let Some(selected_n) = selected_n {
-                                        selected_n + 1
-                                    } else {
-                                        0
-                                    });
-                                    if selected_n.unwrap() >= selectable_lines {
-                                        selected_n = Some(0);
-                                    }
-                                    if let Some(selected) =
-                                        suggs.sugg_terms.get(selected_n.unwrap())
-                                    {
-                                        let (_, interfering_prefix, _) =
-                                            match_engine(&selected, &engines);
-                                        input_line = input_line_from_selection(&interfering_prefix, &prefix,  &selected);
-                                        refresh_completions = false;
-                                    }
-                                }
+                            if let Some(selected) = suggs.sugg_terms.get(selected_n.unwrap()) {
+                                let (_, interfering_prefix, _) = match_engine(&selected, &engines);
+                                input_line = input_line_from_selection(
+                                    &interfering_prefix,
+                                    &prefix,
+                                    &selected,
+                                );
+                                refresh_completions = false;
                             }
-                            KeyEvent::BackTab | KeyEvent::Ctrl('p') | KeyEvent::Up => {
-                                if let Some(ref suggs) = suggs {
-                                    selected_n =
-                                        Some(selected_n.unwrap_or(0).checked_sub(1).unwrap_or(
-                                            selectable_lines.checked_sub(1).unwrap_or(0),
-                                        ));
-                                    if let Some(selected) =
-                                        suggs.sugg_terms.get(selected_n.unwrap())
-                                    {
-                                        let (_, interfering_prefix, _) =
-                                            match_engine(&selected, &engines);
-                                        input_line = input_line_from_selection(&interfering_prefix, &prefix,  &selected);
-                                        refresh_completions = false;
-                                    }
-                                }
+                        }
+                    }
+                    BindableAction::SelectPrev => {
+                        if let Some(ref suggs) = suggs {
+                            selected_n = Some(
+                                selected_n
+                                    .unwrap_or(0)
+                                    .checked_sub(1)
+                                    .unwrap_or(selectable_lines.checked_sub(1).unwrap_or(0)),
+                            );
+                            if let Some(selected) = suggs.sugg_terms.get(selected_n.unwrap()) {
+                                let (_, interfering_prefix, _) = match_engine(&selected, &engines);
+                                input_line = input_line_from_selection(
+                                    &interfering_prefix,
+                                    &prefix,
+                                    &selected,
+                                );
+                                refresh_completions = false;
                             }
-                            KeyEvent::Char(character) => {
-                                // if we don't want spaces in the search term, like with subreddits
-                                // just make space only select a suggestion if one is highlighted
-                                if ! (character == ' ' && engine.space_becomes.is_empty()) {
-                                    input_line.push(character as char);
-                                }
-                                selected_n = None;
-                            }
+                        }
+                    }
 
-                            KeyEvent::Backspace => {
-                                input_line.pop();
-                                selected_n = None;
-                            }
-                            KeyEvent::Ctrl(c) => match c {
-                                'c' => {
-                                    terminal.clear(ClearType::CurrentLine);
-                                    for _ in 0..suggest_lines {
-                                        cursor.move_up(1);
-                                        terminal.clear(ClearType::CurrentLine);
-                                    }
-                                    break;
-                                }
-                                'w' => {
-                                    // delete last word (trim, then delete backwards until first
-                                    // word character or beginning of line
-                                    input_line = input_line
-                                        .trim_end()
-                                        .trim_end_matches(|x: char| !x.is_whitespace())
-                                        .to_string();
-                                }
-                                _ => {}
-                            },
-                            _ => {}
-                        },
-                        _ => {}
-                    },
+                    BindableAction::DeleteChar => {
+                        input_line.pop();
+                        selected_n = None;
+                    }
+                    BindableAction::Exit => {
+                        terminal.clear(ClearType::CurrentLine);
+                        for _ in 0..suggest_lines {
+                            cursor.move_up(1);
+                            terminal.clear(ClearType::CurrentLine);
+                        }
+                        break;
+                    }
+                    BindableAction::DeleteWord => {
+                        // delete last word (trim, then delete backwards until first
+                        // word character or beginning of line
+                        input_line = input_line
+                            .trim_end()
+                            .trim_end_matches(|x: char| !x.is_whitespace())
+                            .to_string();
+                    }
+                    BindableAction::AddChar(character) => {
+                        // if we don't want spaces in the search term, like with subreddits
+                        // just make space only select a suggestion if one is highlighted
+                        if !(character == ' ' && engine.space_becomes.is_empty()) {
+                            input_line.push(character as char);
+                        }
+                        selected_n = None;
+                    }
                     _ => {}
                 }
             }
@@ -265,7 +266,11 @@ fn main() {
     input_thread.join();
 }
 
-fn input_line_from_selection(prefix_in_result: &str, current_prefix: &str, selected_result: &str) -> String{
+fn input_line_from_selection(
+    prefix_in_result: &str,
+    current_prefix: &str,
+    selected_result: &str,
+) -> String {
     if !prefix_in_result.is_empty() {
         // selected_result starts with a prefix that matches one of our engines
         if !current_prefix.is_empty() {
@@ -276,7 +281,7 @@ fn input_line_from_selection(prefix_in_result: &str, current_prefix: &str, selec
             // don't want the prefix in the result to trigger an engine, so escape it
             format!("?{}", selected_result)
         }
-    } else  {
+    } else {
         // no conflict, so just use the result while keeping our existing prefix
         if !current_prefix.is_empty() {
             format!("{} {}", current_prefix, selected_result)
@@ -309,5 +314,5 @@ struct Suggestions {
 
 enum UiMsg {
     SetSuggestions(Suggestions),
-    OnInput(Option<InputEvent>),
+    OnInput(BindableAction),
 }
