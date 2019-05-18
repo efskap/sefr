@@ -149,6 +149,6 @@ This project is currently in its **alpha** stage but is relatively stable.
 - [x] Selection of suggestions w/ prefix edge cases
 - [x] TOML file config
 - [ ] Use real cursor for rendering input buffer, and be able to move it
-- [ ] Configurable keybindings
+- [x] Configurable keybindings
 - [ ] Better feedback for when suggestion endpoints misbehave
 - [ ] CLI args, e.g. providing the initial input buffer through an argument for aliasing.
