@@ -114,7 +114,7 @@ Keybinds are in a vim-like syntax (e.g. `<Down>`, `<C-w>`, `<F12>`), but there a
 - All bindings are in <angle brackets> except single characters (e.g. the literal letter `p`, as in `"p" = "Exit"`).    
  But why would you make a binding like that?
 
-- `Ctrl` is represented by `C-` (e.g. `<C-w>` means 'control + w')
+- `Ctrl` is represented by `C-` (e.g. `<C-w>` means 'control + w'). `Alt` is represented by either `A-` or `M-`.
 
 - Everything inside `<`angle brackets`>` is case-insensitive except the normal key after a modifier.    
 That is, `<a-p>`, `<A-p>`, `<m-p>`, and `<M-p>` all mean the same thing ('alt + p') but `<m-P>` means 'alt + shift + p'.
