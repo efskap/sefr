@@ -202,7 +202,7 @@ dependencies = [
 
 [[package]]
 name = "sefr"
-version = "0.2.3"
+version = "0.3.0"
 dependencies = [
  "crossterm 0.9.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "directories 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
