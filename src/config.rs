@@ -252,7 +252,7 @@ fn load_config_from_file() -> Result<Config, ConfigError> {
     )
     .map_err(|e| {
         ConfigError::new(&format!(
-            "\tCould not parse TOML file {:?}:\n\t\t{}",
+            " ↳ Could not parse TOML file {:?}:\n    ↳ {}",
             config_path, e
         ))
     })
