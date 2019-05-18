@@ -106,15 +106,18 @@ If this section is left out for a particular engine, a basic prompt displaying t
 
 ### Keybindings
 
-Keybindings are a work in progress, but all of the current functions are rebindable under the `[keybinds]` section. Keybinds are in a vim-like syntax (e.g. `<Down>`, `<C-w>`, `<F12>`), but there are a few things to note:
+Keybindings are a work in progress, but all of the current functions are rebindable under the `[keybinds]` section.   
+Keybinds are in a vim-like syntax (e.g. `<Down>`, `<C-w>`, `<F12>`), but there are a few things to note:
 
 - The binding and action are double quoted. So the entire binding is a line like `"<Backspace>" = "DeleteChar"`.
 
-- All bindings are in <angle brackets> except single characters (e.g. the literal letter `p`, as in `"p" = "Exit"`). But why would you make a binding like that?
+- All bindings are in <angle brackets> except single characters (e.g. the literal letter `p`, as in `"p" = "Exit"`).    
+ But why would you make a binding like that?
 
 - `Ctrl` is represented by `C-` (e.g. `<C-w>` means 'control + w')
 
-- Everything inside `<`angle brackets`>` is case-insensitive except the normal key after a modifier. That is, `<a-p>`, `<A-p>`, `<m-p>`, and `<M-p>` all mean the same thing ('alt + p') but `<m-P>` means 'alt + shift + p'.
+- Everything inside `<`angle brackets`>` is case-insensitive except the normal key after a modifier.    
+That is, `<a-p>`, `<A-p>`, `<m-p>`, and `<M-p>` all mean the same thing ('alt + p') but `<m-P>` means 'alt + shift + p'.
 
 - So that means there is no "shift" modifier. To register 'alt + shift + s' you'd write `<a-S>` or `<A-S>`.
 
