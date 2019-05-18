@@ -79,7 +79,7 @@ impl FromStr for KeyBind {
         if s.starts_with('<') {
             let inside = s.trim_matches(|p| p == '<' || p == '>');
 
-            if inside.starts_with('F') {
+            if inside.to_lowercase().starts_with('f') {
                 return Ok(KeyBind(KeyEvent::F(u8::from_str(&inside[1..]).or(Err(
                     Self::Err::new(&format!(
                         "Could not parse '{}' as a function key (e.g. <F12>)",
@@ -91,9 +91,9 @@ impl FromStr for KeyBind {
                 // it's a control character combo
                 let parts: Vec<String> = inside
                     .split('-')
-                    .map(|x| x.to_lowercase().to_string())
+                    .map(|x| x.to_string())
                     .collect();
-                let control_char = &parts[0]; //.and_then(|z| Some(z.to_lowercase().as_str()));
+                let control_char = &parts[0].to_lowercase(); //.and_then(|z| Some(z.to_lowercase().as_str()));
                 match control_char.as_ref() {
                     "c" => {
                         return Ok(KeyBind(KeyEvent::Ctrl(
