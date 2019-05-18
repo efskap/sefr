@@ -36,10 +36,10 @@ impl fmt::Display for KeyBind {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         match &self.0 {
             KeyEvent::Char('\n') => {
-                fmt.write_str(&format!("<cr>")).unwrap();
+                fmt.write_str(&format!("<CR>")).unwrap();
             }
             KeyEvent::Char('\t') => {
-                fmt.write_str(&format!("<tab>")).unwrap();
+                fmt.write_str(&format!("<Tab>")).unwrap();
             }
             KeyEvent::Char(c) => {
                 fmt.write_str(&format!("{}", c)).unwrap();
@@ -76,20 +76,23 @@ impl FromStr for KeyBind {
         if s.len() == 1 {
             return Ok(KeyBind(KeyEvent::Char(s.chars().next().unwrap())));
         }
-        if s.starts_with('F') {
-            return Ok(KeyBind(KeyEvent::F(u8::from_str(&s[1..]).or(Err(
-                Self::Err::new(&format!(
-                    "Could not parse '{}' as a function key (e.g. F12)",
-                    s
-                )),
-            ))?)));
-        }
         if s.starts_with('<') {
             let inside = s.trim_matches(|p| p == '<' || p == '>');
 
+            if inside.starts_with('F') {
+                return Ok(KeyBind(KeyEvent::F(u8::from_str(&inside[1..]).or(Err(
+                    Self::Err::new(&format!(
+                        "Could not parse '{}' as a function key (e.g. <F12>)",
+                        s
+                    )),
+                ))?)));
+            }
             if inside.contains('-') {
                 // it's a control character combo
-                let parts: Vec<String> = inside.split('-').map(|x|x.to_lowercase().to_string()).collect();
+                let parts: Vec<String> = inside
+                    .split('-')
+                    .map(|x| x.to_lowercase().to_string())
+                    .collect();
                 let control_char = &parts[0]; //.and_then(|z| Some(z.to_lowercase().as_str()));
                 match control_char.as_ref() {
                     "c" => {
@@ -126,8 +129,8 @@ impl FromStr for KeyBind {
                 return Ok(KeyBind(match inside.to_lowercase().as_ref() {
                     "bs" | "backspace" => Ok(KeyEvent::Backspace),
                     "enter" | "cr" => Ok(KeyEvent::Char('\n')),
-                    "tab"  => Ok(KeyEvent::Char('\t')),
-                    "backtab"  => Ok(KeyEvent::BackTab),
+                    "tab" => Ok(KeyEvent::Char('\t')),
+                    "backtab" => Ok(KeyEvent::BackTab),
                     "esc" => Ok(KeyEvent::Esc),
                     "up" => Ok(KeyEvent::Up),
                     "down" => Ok(KeyEvent::Down),
@@ -135,7 +138,7 @@ impl FromStr for KeyBind {
                     "right" => Ok(KeyEvent::Right),
                     "home" => Ok(KeyEvent::Home),
                     "end" => Ok(KeyEvent::End),
-                    "pageup"  => Ok(KeyEvent::PageUp),
+                    "pageup" => Ok(KeyEvent::PageUp),
                     "pagedown" => Ok(KeyEvent::PageDown),
                     "delete" | "del" => Ok(KeyEvent::Delete),
                     "insert" => Ok(KeyEvent::Insert),
@@ -188,7 +191,7 @@ pub enum BindableAction {
     Exit,
     Submit,
     ClearInput,
-    AddChar(char)
+    AddChar(char),
 }
 
 #[derive(Debug)]
@@ -247,10 +250,12 @@ fn load_config_from_file() -> Result<Config, ConfigError> {
             config_path
         ))))?,
     )
-    .map_err(|e|ConfigError::new(&format!(
-        "\tCould not parse TOML file {:?}:\n\t\t{}",
-        config_path, e
-    )))
+    .map_err(|e| {
+        ConfigError::new(&format!(
+            "\tCould not parse TOML file {:?}:\n\t\t{}",
+            config_path, e
+        ))
+    })
 }
 
 fn validate_config(config: &mut Config) {
