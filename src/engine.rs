@@ -18,6 +18,7 @@
 use crate::*;
 use crate::config::*;
 
+use std::fmt::{Formatter,Display};
 use serde::{Deserialize, Serialize};
 
 const DEFAULT_NAME: &str = "%%DEFAULT%%";
@@ -80,23 +81,46 @@ pub struct Prompt {
     pub text: String,
 }
 impl Prompt {
-    pub fn draw(&self) {
-        print!(
+    pub fn to_short(&self) -> ShortPrompt {
+        ShortPrompt(self)
+    }
+
+}
+impl Display for Prompt {
+    fn fmt(&self, f: &mut Formatter) -> Result<(), std::fmt::Error> {
+            write!(f,
             "{}{}{}{}",
             Colored::Fg(self.icon_fg),
             Colored::Bg(self.icon_bg),
             self.icon,
             Attribute::Reset
-        ); // icon
-        print!(
+        )?; // icon
+        write!(f,
             "{}{}{}{}",
             Colored::Fg(self.text_fg),
             Colored::Bg(self.text_bg),
             self.text,
             Attribute::Reset
-        ); // promptt text
+        )?; // promptt text
+        Ok(())
     }
 }
+
+pub struct ShortPrompt<'a> (&'a Prompt);
+
+impl<'a> Display for ShortPrompt<'a> {
+    fn fmt(& self, f: &mut Formatter) -> Result<(), std::fmt::Error> {
+            write!(f,
+            "{}{}{}{}",
+            Colored::Fg(self.0.icon_fg),
+            Colored::Bg(self.0.icon_bg),
+            self.0.icon,
+            Attribute::Reset
+        )?; // icon
+        Ok(())
+    }
+}
+
 // TODO: this should prolly return slices, not Strings
 pub fn match_engine<'a, 'b>(
     input_line: &'b str,

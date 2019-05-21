@@ -87,18 +87,22 @@ fn main() {
     let mut input_line: String = String::from("");
     let mut suggs: Option<Suggestions> = None;
     let mut prompt = &engines.get("").expect("No default engine set.").prompt;
-    let mut waiting_for_term: Option<String> = None; //
-    let (t_w, _t_h) = terminal.terminal_size();
+    let mut waiting_for_term: Option<String> = None; // the term for which we are expecting suggestions (in case of out-of-order resolves)
     let mut selected_n: Option<usize> = None;
 
     let mut prev_engine: Option<&Engine> = None;
     let mut refresh_completions = true;
+
+    let mut t_w: u16;
+    // main UI loop
     loop {
+        t_w = terminal.terminal_size().0; // refresh terminal width in case it was resized
         let (engine, prefix, search_term) = match_engine(&input_line, &engines);
         if let Some(ref prev_engine) = prev_engine {
+            // if the engine has changed (based on suggestion url)
             if prev_engine.suggestion_url != engine.suggestion_url {
-                suggs = None;
-                refresh_completions = true;
+                suggs = None; // clear the list that gets drawn asap
+                refresh_completions = true; // and force an update
             }
         }
         prev_engine = Some(&engine);
@@ -110,6 +114,8 @@ fn main() {
                 waiting_for_term = Some(search_term.clone());
                 let url = engine.format_suggestion_url(&search_term);
                 let tx2 = tx.clone();
+                // spawn a separate thread to do the http request and send the result to the
+                // channel that this thread is receiving on
                 thread::spawn(move || {
                     if let Some(resolved_suggs) = fetch_suggs(url).ok() {
                         tx2.send(UiMsg::SetSuggestions(resolved_suggs));
@@ -122,8 +128,25 @@ fn main() {
         cursor.move_left(t_w);
         terminal.clear(ClearType::CurrentLine);
 
-        prompt.draw();
-        println!(" {}_", input_line);
+        let full_prompt_line = format!("{} {}_", prompt, input_line);
+        if full_prompt_line.len() >= t_w as usize {
+            let short_prompt = format!("{}", prompt.to_short());
+            print!("{}", short_prompt);
+            // 2 = spacer + cursor
+            let room_for_input_line = (t_w as usize)
+                .checked_sub(short_prompt.len() + 2)
+                .unwrap_or(0);
+            let truncated_input_line = if input_line.len() > room_for_input_line {
+                format!("{}", &input_line[input_line.len() - room_for_input_line..]).to_string()
+            } else {
+                input_line.clone()
+            };
+            println!(" {}_", truncated_input_line);
+        } else {
+            // just printing full_prompt_line doesn't preserve colours for some reason
+            println!("{} {}_", prompt, input_line);
+        }
+
         let suggest_lines = 15; /*if let Some(ref suggs) = suggs {
                                     suggs.sugg_terms.len()
                                 } else {
