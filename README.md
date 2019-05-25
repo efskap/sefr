@@ -1,8 +1,8 @@
 # sefr (Search Engine FRontend)
 
-[![Crates.io](https://img.shields.io/crates/v/sefr.svg) ![Crates.io](https://img.shields.io/crates/d/sefr.svg)](https://crates.io/crates/sefr)
+[![Crates.io](https://img.shields.io/crates/v/sefr.svg)![Crates.io](https://img.shields.io/crates/d/sefr.svg)](https://crates.io/crates/sefr)
 
-Terminal program for interactively opening search engines / parametric URLs.  
+Terminal program for interactively opening search engines / parametric URLs
 It's kinda like surfraw but with interactive suggestions (via parsing opensearch json).
 
 ![](https://github.com/efskap/sefr/raw/master/demo.gif "demo gif")
@@ -15,8 +15,8 @@ I use custom url bar search engines a lot, but browser support for them is frust
  - Chrome makes defining them easy, syncs them, but doesn't let you specify suggestion endpoints.
  - Vivaldi makes defining them easy, lets you specify suggestion endpoints, but doesn't sync them.
 
-e.g. in stock Firefox, you can't create a search engine that, when you type "r foo" in your url bar, automatically goes to "reddit.com/r/foo".
-You have to manually write the URL, and you don't even get completions!
+e.g. in stock Firefox, while you can create a bookmark keyword so that when you type "r foo" in your url bar,
+it automatically goes to "reddit.com/r/foo", you can't get completions, and you can't set it as the default search engine.
 
 This is meant to be a customizable crossplatform solution, and since it uses your default browser ([more details](https://github.com/amodm/webbrowser-rs#examples)), you can integrate it into a GUI workflow with a global hotkey (see below).
 
@@ -49,7 +49,7 @@ e.g. For Linux, the config file will be found in `~/.config/sefr/config.toml`.
 ### Adding new engines
 __Warning: The current configuration format might be changed in the future!__
 
-New engines can be added for use by `sefr` by adding them to the `config.toml` file. 
+New engines can be added for use by `sefr` by adding them to the `config.toml` file.
 
 A basic engine definition looks like this:
 
@@ -64,9 +64,9 @@ suggestion_url = "http://suggestqueries.google.com/complete/search?client=firefo
 - `name` is the name of the engine, used for the prompt text if not defined in the prompt section (more on that later).
 - `search_url` is opened in your browser with `%s` replaced by the search term when enter is pressed.
 - `suggestion_url` (optional) is the endpoint queried for suggestions (with `%s` replaced by the search term) while typing. It must return  [OpenSearch suggestions schema json](http://www.opensearch.org/Specifications/OpenSearch/Extensions/Suggestions).
-- `space_becomes` (optional, `+` by default) is what spaces are replaced with before `search_url` is opened.  
+- `space_becomes` (optional, `+` by default) ~~is what spaces are replaced with before `search_url` is opened.~~  Currently only prevents space from entered when set to `""`, because we now urlencode the search term.
 In the default config:
-  - `engines.wkt` (Wiktionary) and `engines.w` (Wikipedia) have it set to `_`, because that's how Wikis encode spaces in their URLs.
+  - `engines.wkt` (Wiktionary) and `engines.w` (Wikipedia) ~~have it set to `_`, because that's how Wikis encode spaces in their URLs.~~  now use a different search endpoint that doesn't require underscores.
   - `engines.r` (Subreddit) has it set to a blank string, because subreddits can't have spaces in their names (note that this value prevents spaces from being entered into the input buffer when the engine is selected so that space can be used to select a suggestion without performing a search).
 
 The engine used when no prefix is entered is defined as `_default` in the config, and it is obligatory for the program to start. Example:
@@ -106,17 +106,17 @@ If this section is left out for a particular engine, a basic prompt displaying t
 
 ### Keybindings
 
-Keybindings are a work in progress, but all of the current functions are rebindable under the `[keybinds]` section.   
+Keybindings are a work in progress, but all of the current functions are rebindable under the `[keybinds]` section.
 Keybinds are in a vim-like syntax (e.g. `<Down>`, `<C-w>`, `<F12>`), but there are a few things to note:
 
 - The binding and action are double quoted. So the entire binding is a line like `"<Backspace>" = "DeleteChar"`.
 
-- All bindings are in <angle brackets> except single characters (e.g. the literal letter `p`, as in `"p" = "Exit"`).    
+- All bindings are in <angle brackets> except single characters (e.g. the literal letter `p`, as in `"p" = "Exit"`).
  But why would you make a binding like that?
 
 - `Ctrl` is represented by `C-` (e.g. `<C-w>` means 'control + w'). `Alt` is represented by either `A-` or `M-`.
 
-- Everything inside `<`angle brackets`>` is case-insensitive except the normal key after a modifier.    
+- Everything inside `<`angle brackets`>` is case-insensitive except the normal key after a modifier.
 That is, `<a-p>`, `<A-p>`, `<m-p>`, and `<M-p>` all mean the same thing ('alt + p') but `<m-P>` means 'alt + shift + p'.
 
 - So that means there is no "shift" modifier. To register 'alt + shift + s' you'd write `<a-S>` or `<A-S>`.

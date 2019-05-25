@@ -35,8 +35,12 @@ use std::thread;
 
 mod config;
 mod engine;
+mod util;
+
+
 use config::*;
 use engine::*;
+use util::*;
 
 #[allow(unused_must_use)]
 fn main() {
@@ -133,14 +137,11 @@ fn main() {
             let short_prompt = format!("{}", prompt.to_short());
             print!("{}", short_prompt);
             // 2 = spacer + cursor
+            // TODO: don't count control characters for length
             let room_for_input_line = (t_w as usize)
                 .checked_sub(short_prompt.len() + 2)
                 .unwrap_or(0);
-            let truncated_input_line = if input_line.len() > room_for_input_line {
-                format!("{}", &input_line[input_line.len() - room_for_input_line..]).to_string()
-            } else {
-                input_line.clone()
-            };
+            let truncated_input_line = truncate_from_end(&input_line, room_for_input_line);
             println!(" {}_", truncated_input_line);
         } else {
             // just printing full_prompt_line doesn't preserve colours for some reason
@@ -163,19 +164,22 @@ fn main() {
 
             if let Some(ref suggs) = suggs {
                 match suggs.sugg_terms.get(n) {
-                    Some(line) => match selected_n {
+                    Some(line) => {
+                        let line_trunc = truncate_from_end(&line, t_w as usize);
+                        match selected_n {
                         Some(selected_n) if selected_n == n => {
                             print!(
                                 "{}{}{}{}",
                                 Colored::Fg(Color::Black),
                                 Colored::Bg(Color::White),
-                                line,
+                                line_trunc,
                                 Attribute::Reset
                             );
                         }
                         _ => {
-                            print!("{}", line);
+                            print!("{}", line_trunc);
                         }
+                    }
                     },
                     None => {} // outside sugg bounds
                 }

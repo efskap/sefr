@@ -330,6 +330,27 @@ fn get_default_config() -> Config {
         },
     );
     engs.insert(
+        "ddg".to_string(),
+        Engine {
+            name: "DuckDuckGo".to_string(),
+            suggestion_url: "https://duckduckgo.com/ac/?q=%s&type=list".to_string(),
+            search_url: "https://duckduckgo.com/?q=%s".to_string(),
+            space_becomes: "+".into(),
+            prompt: Prompt {
+                icon_fg: Color::White,
+                icon_bg: Color::Rgb {
+                    r: 222,
+                    g: 88,
+                    b: 51,
+                },
+                icon: String::from(" ♞ "),
+                text_fg: Color::Black,
+                text_bg: Color::White,
+                text: DEFAULT_NAME.into()
+            },
+        },
+    );
+    engs.insert(
         "g".to_string(),
         Engine {
             name: "Google (I'm Feeling Lucky)".to_string(),
@@ -372,8 +393,8 @@ fn get_default_config() -> Config {
         Engine {
             name: "Wiktionary".to_string(),
             suggestion_url: "https://en.wiktionary.org/w/api.php?action=opensearch&search=%s&limit=15&namespace=0&format=json".to_string(),
-            search_url: "https://en.wiktionary.org/wiki/%s".to_string(),
-            space_becomes: "_".into(),
+            search_url: "https://www.wiktionary.org/search-redirect.php?family=wiktionary&language=en&search=%s&go=Go".to_string(),
+            space_becomes: "+".into(),
             prompt: Prompt {
                 icon_fg: Color::Black,
                 icon_bg: Color::White,
@@ -389,8 +410,8 @@ fn get_default_config() -> Config {
         Engine {
             name: "Wikipedia".to_string(),
             suggestion_url: "https://en.wikipedia.org/w/api.php?action=opensearch&search=%s&limit=15&namespace=0&format=json".to_string(),
-            search_url: "https://en.wikipedia.org/wiki/%s".to_string(),
-            space_becomes: "_".into(),
+            search_url: "https://www.wikipedia.org/search-redirect.php?family=wikipedia&language=en&search=%s&language=en&go=Go".to_string(),
+            space_becomes: "+".into(),
             prompt: Prompt {
                 icon_fg: Color::Black,
                 icon_bg: Color::White,

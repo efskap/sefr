@@ -20,6 +20,7 @@ use crate::config::*;
 
 use std::fmt::{Formatter,Display};
 use serde::{Deserialize, Serialize};
+use percent_encoding::{utf8_percent_encode, DEFAULT_ENCODE_SET};
 
 const DEFAULT_NAME: &str = "%%DEFAULT%%";
 
@@ -38,13 +39,16 @@ pub struct Engine {
 }
 
 impl Engine {
+    fn encode(s: &str) -> String {
+        utf8_percent_encode(&s, DEFAULT_ENCODE_SET).to_string().replace("+", "%2B").into()
+    }
     pub fn format_suggestion_url(&self, search_term: &str) -> String {
         self.suggestion_url
-            .replace("%s", &search_term.replace(" ", "+"))
+            .replace("%s", &Self::encode(&search_term))
     }
     pub fn format_search_url(&self, search_term: &str) -> String {
         self.search_url
-            .replace("%s", &search_term.replace(" ", &self.space_becomes))
+            .replace("%s", &Self::encode(&search_term))
     }
 }
 
