@@ -26,13 +26,15 @@ There are two ways to install `sefr`:
 1. Clone this repository, install [the Rust toolchain](https://rustup.rs/), and either call `cargo run` in the cloned directory to try it out, or `cargo build` to create a binary located at `target/debug/sefr`.
 2. Install via cargo by calling `cargo install sefr`. This should make it runnable from anywhere.
 
-A convenient way to integrate it into your desktop environment is by mapping a global hotkey to launch it in a lightweight terminal. For example, I currently use this in KDE, globally bound to Super+s, with a kwin rule that hides window decorations for wmclass=`sefr st`:
+A convenient way to integrate it into your desktop environment is by mapping a global hotkey to launch it in a lightweight terminal, making for rofi-like UX.
+
+For example, I currently use this in KDE (using the fantastically lightweight [suckless terminal](https://st.suckless.org/)), globally bound to Super+s, with a kwin rule that hides window decorations for wmclass=`sefr st`:
 
 ```sh
 st -n sefr -g 70x18  -f 'Monospace:size=14' -e ~/src/sefr/target/debug/sefr
 ```
 
-For i3 + suckless terminal, this works well. Not sure why I have to specify `$BROWSER`.
+For i3, this works well. Not sure why I have to specify `$BROWSER`.
 
 ```sh
 for_window [instance="^sefr$"] floating enable, resize set 640 480, move position center
