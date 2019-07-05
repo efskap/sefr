@@ -35,11 +35,12 @@ use std::thread;
 
 mod config;
 mod engine;
+mod suggestion_adapter;
 mod util;
-
 
 use config::*;
 use engine::*;
+use suggestion_adapter::*;
 use util::*;
 
 #[allow(unused_must_use)]
@@ -112,19 +113,41 @@ fn main() {
         prev_engine = Some(&engine);
         if refresh_completions {
             prompt = &engine.prompt;
-            if input_line.is_empty() {
+            if search_term.is_empty() {
                 suggs = None;
+                waiting_for_term = None;
             } else {
                 waiting_for_term = Some(search_term.clone());
                 let url = engine.format_suggestion_url(&search_term);
                 let tx2 = tx.clone();
+                // TODO: this should be done with boxed traits I think?
+                let sugg_adapter = engine.suggestion_adapter.clone();
+                let search_term2 = search_term.clone();
                 // spawn a separate thread to do the http request and send the result to the
                 // channel that this thread is receiving on
-                thread::spawn(move || {
-                    if let Some(resolved_suggs) = fetch_suggs(url).ok() {
-                        tx2.send(UiMsg::SetSuggestions(resolved_suggs));
-                    }
-                });
+                if !url.is_empty() {
+                    thread::spawn(move || {
+                        let resolved_suggs = match sugg_adapter {
+                            SuggestionAdapterName::OpenSearch => {
+                                OpenSearchAdapter::get(url, search_term2)
+                            }
+                            SuggestionAdapterName::JsonPath(path) => {
+                                JsonPathAdapter(path).get(url, search_term2)
+                            }
+                        };
+                        match resolved_suggs{
+                            Ok(resolved_suggs) => {
+                                tx2.send(UiMsg::SetSuggestions(resolved_suggs));
+                            }
+                            Err(e) => {
+                                // hacky but i want the error to be seen
+                                for _ in 1..20 {
+                                    println!("Error: {}", e);
+                                }
+                            }
+                        }
+                    });
+                }
             }
             refresh_completions = false;
             selected_n = None;
@@ -167,20 +190,20 @@ fn main() {
                     Some(line) => {
                         let line_trunc = truncate_from_end(&line, t_w as usize);
                         match selected_n {
-                        Some(selected_n) if selected_n == n => {
-                            print!(
-                                "{}{}{}{}",
-                                Colored::Fg(Color::Black),
-                                Colored::Bg(Color::White),
-                                line_trunc,
-                                Attribute::Reset
-                            );
-                        }
-                        _ => {
-                            print!("{}", line_trunc);
+                            Some(selected_n) if selected_n == n => {
+                                print!(
+                                    "{}{}{}{}",
+                                    Colored::Fg(Color::Black),
+                                    Colored::Bg(Color::White),
+                                    line_trunc,
+                                    Attribute::Reset
+                                );
+                            }
+                            _ => {
+                                print!("{}", line_trunc);
+                            }
                         }
                     }
-                    },
                     None => {} // outside sugg bounds
                 }
             }
@@ -319,20 +342,10 @@ fn input_line_from_selection(
         }
     }
 }
-fn fetch_suggs(url: String) -> Result<Suggestions, Box<std::error::Error>> {
-    let text = minreq::get(url).send()?.body;
-    let data = json::parse(&text)?;
-    let term = data[0]
-        .as_str()
-        .ok_or("first array value not a string")?
-        .to_string();
-    let sugg_terms: Vec<String> = data[1].members().map(|opt|opt.as_str().expect("one of the values in the second value (which should be an array) is not a string").to_string()).collect(); // todo: error handling
-    Ok(Suggestions { term, sugg_terms })
-}
 
 // mirrors opensearch schema
 #[derive(Debug)]
-struct Suggestions {
+pub struct Suggestions {
     term: String,
     sugg_terms: Vec<String>,
     //descriptions: Vec<String>,

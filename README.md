@@ -66,10 +66,9 @@ suggestion_url = "http://suggestqueries.google.com/complete/search?client=firefo
 - `name` is the name of the engine, used for the prompt text if not defined in the prompt section (more on that later).
 - `search_url` is opened in your browser with `%s` replaced by the search term when enter is pressed.
 - `suggestion_url` (optional) is the endpoint queried for suggestions (with `%s` replaced by the search term) while typing. It must return  [OpenSearch suggestions schema json](http://www.opensearch.org/Specifications/OpenSearch/Extensions/Suggestions).
-- `space_becomes` (optional, `+` by default) ~~is what spaces are replaced with before `search_url` is opened.~~  Currently only prevents space from entered when set to `""`, because we now urlencode the search term.
-In the default config:
-  - `engines.wkt` (Wiktionary) and `engines.w` (Wikipedia) ~~have it set to `_`, because that's how Wikis encode spaces in their URLs.~~  now use a different search endpoint that doesn't require underscores.
-  - `engines.r` (Subreddit) has it set to a blank string, because subreddits can't have spaces in their names (note that this value prevents spaces from being entered into the input buffer when the engine is selected so that space can be used to select a suggestion without performing a search).
+- `space_becomes` (optional, ` ` (space) by default) is what spaces are replaced with before urls are urlencoded and requested.
+  - In the default config,  `engines.r` (Subreddit) has it set to a blank string, because subreddits can't have spaces in their names (note that this value prevents spaces from being entered into the input buffer when the engine is selected so that space can be used to select a suggestion without performing a search).
+  - If you wanted to have a wikipedia search engine that goes directly to the article without the redirect in the default config, you could set `space_becomes` to `_` in order to format the article name in the correct format.
 
 The engine used when no prefix is entered is defined as `_default` in the config, and it is obligatory for the program to start. Example:
 

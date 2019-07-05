@@ -29,6 +29,10 @@ pub fn truncate_from_end(s: &str, n: usize) -> String {
     }
 }
 
+pub fn is_default<T: Default + PartialEq>(t: &T) -> bool {
+    t == &T::default()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -36,19 +36,21 @@ pub struct Engine {
     pub search_url: String,
     #[serde(default = "_default_space_becomes", skip_serializing_if = "_is_default_space_becomes")]
     pub space_becomes: String,
+    #[serde(default, skip_serializing_if = "is_default")]
+    pub suggestion_adapter: SuggestionAdapterName
 }
 
 impl Engine {
-    fn encode(s: &str) -> String {
-        utf8_percent_encode(&s, DEFAULT_ENCODE_SET).to_string().replace("+", "%2B").into()
+    fn encode(&self, s: &str) -> String {
+        utf8_percent_encode(&s.replace(" ", &self.space_becomes), DEFAULT_ENCODE_SET).to_string().replace("+", "%2B").into()
     }
     pub fn format_suggestion_url(&self, search_term: &str) -> String {
         self.suggestion_url
-            .replace("%s", &Self::encode(&search_term))
+            .replace("%s", &self.encode(&search_term))
     }
     pub fn format_search_url(&self, search_term: &str) -> String {
         self.search_url
-            .replace("%s", &Self::encode(&search_term))
+            .replace("%s", &self.encode(&search_term))
     }
 }
 
@@ -172,7 +174,7 @@ fn _is_default_name(s: &str) -> bool {
     s == _default_name()
 }
 fn _default_space_becomes() -> String {
-    "+".into()
+    " ".into()
 }
 fn _is_default_space_becomes(s: &str) -> bool {
     s == _default_space_becomes()

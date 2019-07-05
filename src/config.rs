@@ -89,10 +89,7 @@ impl FromStr for KeyBind {
             }
             if inside.contains('-') {
                 // it's a control character combo
-                let parts: Vec<String> = inside
-                    .split('-')
-                    .map(|x| x.to_string())
-                    .collect();
+                let parts: Vec<String> = inside.split('-').map(|x| x.to_string()).collect();
                 let control_char = &parts[0].to_lowercase(); //.and_then(|z| Some(z.to_lowercase().as_str()));
                 match control_char.as_ref() {
                     "c" => {
@@ -182,6 +179,64 @@ pub struct Config {
     pub keybinds: HashMap<KeyBind, BindableAction>,
 }
 
+#[derive(Clone, PartialEq)]
+pub enum SuggestionAdapterName {
+    OpenSearch,
+    JsonPath(String),
+}
+impl fmt::Display for SuggestionAdapterName {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            SuggestionAdapterName::OpenSearch => fmt.write_str("opensearch")?,
+            SuggestionAdapterName::JsonPath(x) => {
+                fmt.write_str("json:")?;
+                fmt.write_str(x)?
+            }
+        };
+        Ok(())
+    }
+}
+impl FromStr for SuggestionAdapterName {
+    type Err = ConfigError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let lower = s.to_lowercase();
+        if lower == "opensearch" {
+            return Ok(SuggestionAdapterName::OpenSearch);
+        };
+        if lower.starts_with("json:") {
+            let jsonpath = &s["json:".len()..];
+            return Ok(SuggestionAdapterName::JsonPath(jsonpath.into()));
+        }
+        return Err(Self::Err::new(&format!(
+            "Unrecognized suggestion adapter string: {}",
+            s
+        )));
+    }
+}
+
+impl<'de> Deserialize<'de> for SuggestionAdapterName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let s = String::deserialize(deserializer)?;
+        FromStr::from_str(&s).map_err(de::Error::custom)
+    }
+}
+impl Serialize for SuggestionAdapterName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.to_string().serialize(serializer)
+    }
+}
+impl Default for SuggestionAdapterName {
+    fn default() -> SuggestionAdapterName {
+        SuggestionAdapterName::OpenSearch
+    }
+}
 #[derive(Serialize, Deserialize, Clone)]
 pub enum BindableAction {
     SelectNext,
@@ -200,7 +255,7 @@ pub struct ConfigError {
 }
 
 impl ConfigError {
-    fn new(msg: &str) -> ConfigError {
+    pub fn new(msg: &str) -> ConfigError {
         ConfigError {
             details: msg.to_string(),
         }
@@ -230,8 +285,11 @@ fn load_config_from_file() -> Result<Config, ConfigError> {
     let config_path = config_dir.join("config.toml");
     let default_toml = format!(
         "{}",
-        toml::Value::try_from(&get_default_config()).or(Err(ConfigError::new(
-            "Could not serialize default config to TOML. This... shouldn't happen."
+        toml::Value::try_from(&get_default_config()).or_else(|e| Err(ConfigError::new(
+            &format!(
+                "Could not serialize default config to TOML. This... shouldn't happen. {:?}",
+                e
+            )
         )))?
     );
     if !config_path.exists() {
@@ -319,6 +377,7 @@ fn get_default_config() -> Config {
             suggestion_url: "https://www.google.com/complete/search?client=chrome&q=%s".to_string(),
             search_url: "https://www.google.com/search?q=%s".to_string(),
             space_becomes: "+".into(),
+            suggestion_adapter: Default::default(),
             prompt: Prompt {
                 icon_fg: Color::White,
                 icon_bg: Color::Blue,
@@ -336,6 +395,7 @@ fn get_default_config() -> Config {
             suggestion_url: "https://duckduckgo.com/ac/?q=%s&type=list".to_string(),
             search_url: "https://duckduckgo.com/?q=%s".to_string(),
             space_becomes: "+".into(),
+            suggestion_adapter: Default::default(),
             prompt: Prompt {
                 icon_fg: Color::White,
                 icon_bg: Color::Rgb {
@@ -346,7 +406,7 @@ fn get_default_config() -> Config {
                 icon: String::from(" ♞ "),
                 text_fg: Color::Black,
                 text_bg: Color::White,
-                text: DEFAULT_NAME.into()
+                text: DEFAULT_NAME.into(),
             },
         },
     );
@@ -357,6 +417,7 @@ fn get_default_config() -> Config {
             suggestion_url: "https://www.google.com/complete/search?client=chrome&q=%s".to_string(),
             search_url: "https://www.google.com/search?btnI&q=%s".to_string(),
             space_becomes: "+".into(),
+            suggestion_adapter: Default::default(),
             prompt: Prompt {
                 icon_fg: Color::White,
                 icon_bg: Color::Blue,
@@ -374,6 +435,7 @@ fn get_default_config() -> Config {
             suggestion_url: "https://www.google.com/complete/search?client=chrome&q=%s".to_string(),
             search_url: "https://www.google.com/search?q=site:reddit.com+%s".to_string(),
             space_becomes: "+".into(),
+            suggestion_adapter: Default::default(),
             prompt: Prompt {
                 icon_fg: Color::White,
                 icon_bg: Color::Rgb {
@@ -395,6 +457,7 @@ fn get_default_config() -> Config {
             suggestion_url: "https://en.wiktionary.org/w/api.php?action=opensearch&search=%s&limit=15&namespace=0&format=json".to_string(),
             search_url: "https://www.wiktionary.org/search-redirect.php?family=wiktionary&language=en&search=%s&go=Go".to_string(),
             space_becomes: "+".into(),
+            suggestion_adapter: Default::default(),
             prompt: Prompt {
                 icon_fg: Color::Black,
                 icon_bg: Color::White,
@@ -412,6 +475,7 @@ fn get_default_config() -> Config {
             suggestion_url: "https://en.wikipedia.org/w/api.php?action=opensearch&search=%s&limit=15&namespace=0&format=json".to_string(),
             search_url: "https://www.wikipedia.org/search-redirect.php?family=wikipedia&language=en&search=%s&language=en&go=Go".to_string(),
             space_becomes: "+".into(),
+            suggestion_adapter: Default::default(),
             prompt: Prompt {
                 icon_fg: Color::Black,
                 icon_bg: Color::White,
@@ -431,6 +495,7 @@ fn get_default_config() -> Config {
                     .to_string(),
             search_url: "https://www.youtube.com/results?q=%s".to_string(),
             space_becomes: "+".into(),
+            suggestion_adapter: Default::default(),
             prompt: Prompt {
                 icon_fg: Color::White,
                 icon_bg: Color::Red,
@@ -445,11 +510,11 @@ fn get_default_config() -> Config {
         "r".to_string(),
         Engine {
             name: "Subreddit".to_string(),
-            suggestion_url:
-                "https://us-central1-subreddit-suggestions.cloudfunctions.net/suggest?query=%s"
-                    .to_string(),
+            suggestion_url: "https://www.reddit.com/api/search_reddit_names.json?query=%s"
+                .to_string(),
             search_url: "https://www.reddit.com/r/%s".to_string(),
             space_becomes: "".into(), // subreddits dont have spaces
+            suggestion_adapter: SuggestionAdapterName::JsonPath("names".into()),
             prompt: Prompt {
                 icon_fg: Color::White,
                 icon_bg: Color::Rgb {
