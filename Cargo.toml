@@ -14,7 +14,7 @@ license = "GPL-3.0-or-later"
 crossterm = "0.9.4"
 minreq = { version = "1.1.2", features = ["https"] }
 json = "0.11"
-webbrowser = "0.5"
+webbrowser = "0.8"
 toml = "0.4"
 serde = {version = "1.0", features = ["derive"]}
 directories = "1.0"
